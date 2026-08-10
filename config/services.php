@@ -53,6 +53,7 @@ return [
         'project_id' => env('GOOGLE_TRENDS_BIGQUERY_PROJECT_ID'),
         'client_email' => env('GOOGLE_TRENDS_BIGQUERY_CLIENT_EMAIL'),
         'private_key' => env('GOOGLE_TRENDS_BIGQUERY_PRIVATE_KEY'),
+        'private_key_base64' => env('GOOGLE_TRENDS_BIGQUERY_PRIVATE_KEY_BASE64'),
         'token_url' => env('GOOGLE_TRENDS_BIGQUERY_TOKEN_URL', 'https://oauth2.googleapis.com/token'),
         'base_url' => env('GOOGLE_TRENDS_BIGQUERY_BASE_URL', 'https://bigquery.googleapis.com/bigquery/v2'),
         'dataset' => env('GOOGLE_TRENDS_BIGQUERY_DATASET', 'bigquery-public-data.google_trends'),

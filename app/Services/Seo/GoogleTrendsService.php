@@ -16,7 +16,10 @@ class GoogleTrendsService
     {
         return filled(config('services.google_trends_bigquery.project_id'))
             && filled(config('services.google_trends_bigquery.client_email'))
-            && filled(config('services.google_trends_bigquery.private_key'));
+            && (
+                filled(config('services.google_trends_bigquery.private_key_base64'))
+                || filled(config('services.google_trends_bigquery.private_key'))
+            );
     }
 
     public function isReadyForProject(Project $project): bool
@@ -374,7 +377,24 @@ SQL;
 
     protected function privateKey(): string
     {
-        return str_replace('\n', "\n", (string) config('services.google_trends_bigquery.private_key'));
+        $base64Key = trim((string) config('services.google_trends_bigquery.private_key_base64'));
+
+        if ($base64Key !== '') {
+            $decodedKey = base64_decode($base64Key, true);
+
+            if ($decodedKey !== false && $decodedKey !== '') {
+                return $this->normalizePrivateKey($decodedKey);
+            }
+        }
+
+        return $this->normalizePrivateKey((string) config('services.google_trends_bigquery.private_key'));
+    }
+
+    protected function normalizePrivateKey(string $privateKey): string
+    {
+        $normalizedKey = trim($privateKey, " \t\n\r\0\x0B\"");
+
+        return str_replace(["\r\n", '\r\n', '\n', '\r'], "\n", $normalizedKey);
     }
 
     protected function base64UrlEncode(string $value): string
