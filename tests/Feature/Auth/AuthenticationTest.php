@@ -9,6 +9,21 @@ test('login screen can be rendered', function () {
     $response->assertOk();
 });
 
+test('login screen honors forwarded https headers', function () {
+    config()->set('app.url', 'https://blog.inovaforce.com.br');
+
+    $response = $this->get('/login', [
+        'HTTP_HOST' => 'blog.inovaforce.com.br',
+        'HTTP_X_FORWARDED_HOST' => 'blog.inovaforce.com.br',
+        'HTTP_X_FORWARDED_PORT' => '443',
+        'HTTP_X_FORWARDED_PROTO' => 'https',
+    ]);
+
+    $response->assertOk();
+    $response->assertSee('https://blog.inovaforce.com.br/login', escape: false);
+    $response->assertDontSee('http://blog.inovaforce.com.br', escape: false);
+});
+
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
