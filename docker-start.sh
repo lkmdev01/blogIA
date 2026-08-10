@@ -14,6 +14,8 @@ if [ ! -L /app/public/storage ]; then
     su-exec www-data php artisan storage:link >/dev/null 2>&1 || true
 fi
 
+su-exec www-data php artisan migrate --force --graceful --ansi
+
 pids=()
 
 php-fpm -F &
