@@ -12,6 +12,17 @@
             <flux:input wire:model="niche" label="Nicho" placeholder="IA para empresas" />
 
             <flux:textarea wire:model="description" label="Descricao" rows="3" />
+            <flux:textarea
+                wire:model="hero_description"
+                label="Texto do Hero"
+                rows="3"
+                placeholder="Conteudos sobre inteligencia artificial aplicada a empresas, com foco em automacao, produtividade e crescimento comercial."
+            />
+            <flux:input
+                wire:model="hero_image_url"
+                label="Imagem do Hero (URL)"
+                placeholder="https://images.unsplash.com/..."
+            />
 
             <flux:textarea wire:model="primaryKeywords" label="Palavras-chave principais" rows="3" placeholder="ia para empresas, automacao de marketing, conteudo seo" />
 

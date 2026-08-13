@@ -9,33 +9,65 @@ use Livewire\Component;
 new class extends Component
 {
     public string $name = '';
+
     public string $domain = '';
+
     public string $target_location = '';
+
     public string $search_console_property = '';
+
     public string $target_country = 'BRA';
+
     public string $google_trends_country = 'BR';
+
     public string $google_trends_region = 'Sao Paulo';
+
     public string $niche = '';
+
     public string $description = '';
+
+    public string $hero_description = 'Conteudos sobre inteligencia artificial aplicada a empresas, com foco em automacao, produtividade e crescimento comercial.';
+
+    public string $hero_image_url = '';
+
     public string $primaryKeywords = '';
+
     public string $writing_tone = 'consultivo';
+
     public int $average_article_words = 1800;
+
     public string $posting_frequency = 'daily';
+
     public int $posts_per_day = 1;
+
     public string $language = 'pt-BR';
+
     public string $blog_type = 'authority';
+
     public string $ai_provider = 'groq';
+
     public int $generation_batch_size = 3;
+
     public int $generation_delay_seconds = 20;
+
     public string $article_depth = 'standard';
+
     public int $h2_count = 6;
+
     public int $h3_count = 2;
+
     public bool $include_faq = true;
+
     public string $target_persona = 'gestores e empreendedores';
+
     public string $default_cta = 'Fale com nossa equipe para transformar SEO em crescimento previsivel.';
+
     public bool $generate_images = false;
+
     public bool $enable_interlinking = true;
+
     public bool $auto_generate_content = true;
+
     public bool $auto_publish = false;
 
     #[Computed]
@@ -60,6 +92,8 @@ new class extends Component
             'google_trends_region' => ['nullable', 'string', 'max:160'],
             'niche' => ['required', 'string', 'max:160'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'hero_description' => ['nullable', 'string', 'max:1000'],
+            'hero_image_url' => ['nullable', 'url', 'max:2048'],
             'primaryKeywords' => ['required', 'string', 'max:1000'],
             'writing_tone' => ['required', 'string', 'max:80'],
             'average_article_words' => ['required', 'integer', 'min:500', 'max:6000'],
@@ -93,6 +127,8 @@ new class extends Component
             'google_trends_region' => $validated['google_trends_region'] ?: null,
             'niche' => $validated['niche'],
             'description' => $validated['description'] ?: null,
+            'hero_description' => $validated['hero_description'] ?: null,
+            'hero_image_url' => $validated['hero_image_url'] ?: null,
             'primary_keywords' => $this->keywordsFromText($validated['primaryKeywords']),
             'writing_tone' => $validated['writing_tone'],
             'average_article_words' => $validated['average_article_words'],

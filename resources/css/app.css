@@ -62,6 +62,27 @@ select:focus[data-flux-control] {
 }
 
 @layer components {
+    .blogia-marquee {
+        --marquee-gap: 0.9rem;
+        @apply overflow-hidden;
+        mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+    }
+
+    .blogia-marquee-track {
+        @apply flex w-max items-center;
+        gap: var(--marquee-gap);
+        animation: blogia-marquee 30s linear infinite;
+    }
+
+    .blogia-marquee-track-reverse {
+        animation-direction: reverse;
+        animation-duration: 34s;
+    }
+
+    .blogia-marquee-chip {
+        @apply shrink-0 rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm text-zinc-100 backdrop-blur-sm;
+    }
+
     .blogia-prose {
         @apply max-w-none text-[1.05rem] leading-8 text-zinc-700;
     }
@@ -102,12 +123,12 @@ select:focus[data-flux-control] {
     }
 
     .blogia-prose a {
-        @apply font-medium text-lime-700 underline decoration-lime-300 underline-offset-4 hover:text-lime-800;
+        @apply font-medium text-emerald-700 underline decoration-emerald-200 underline-offset-4 hover:text-emerald-800;
     }
 
     .blogia-prose ul,
     .blogia-prose ol {
-        @apply my-6 space-y-3 rounded-3xl bg-lime-50/70 p-6 pl-10 ring-1 ring-lime-900/5;
+        @apply my-6 space-y-3 rounded-lg bg-zinc-100 p-6 pl-10 ring-1 ring-zinc-200;
     }
 
     .blogia-prose ul {
@@ -119,11 +140,11 @@ select:focus[data-flux-control] {
     }
 
     .blogia-prose li {
-        @apply pl-1 text-zinc-700 marker:text-lime-700;
+        @apply pl-1 text-zinc-700 marker:text-emerald-700;
     }
 
     .blogia-prose blockquote {
-        @apply my-8 rounded-3xl border-l-4 border-lime-500 bg-zinc-950 p-6 text-lg font-medium leading-8 text-white shadow-xl shadow-zinc-950/10;
+        @apply my-8 rounded-lg border-l-4 border-emerald-500 bg-zinc-950 p-6 text-lg font-medium leading-8 text-white shadow-xl shadow-zinc-950/10;
     }
 
     .blogia-prose blockquote p {
@@ -132,6 +153,16 @@ select:focus[data-flux-control] {
 
     .blogia-prose hr {
         @apply my-10 border-zinc-200;
+    }
+}
+
+@keyframes blogia-marquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(calc(-50% - (var(--marquee-gap) / 2)));
     }
 }
 

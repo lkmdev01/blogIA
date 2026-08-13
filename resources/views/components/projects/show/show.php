@@ -12,21 +12,46 @@ use Livewire\Component;
 new class extends Component
 {
     public Project $project;
+
     public ?array $signalDiagnostics = null;
+
     public string $ai_provider = 'groq';
+
     public int $generation_batch_size = 3;
+
     public int $generation_delay_seconds = 20;
+
     public string $article_depth = 'standard';
+
     public int $h2_count = 6;
+
     public int $h3_count = 2;
+
     public string $target_location = '';
+
     public string $search_console_property = '';
+
     public string $target_country = 'BRA';
+
     public string $google_trends_country = 'BR';
+
     public string $google_trends_region = 'Sao Paulo';
+
     public bool $include_faq = true;
+
     public string $target_persona = '';
+
     public string $default_cta = '';
+
+    public string $hero_description = '';
+
+    public string $hero_image_url = '';
+
+    public string $ga4_measurement_id = '';
+
+    public string $posthog_api_key = '';
+
+    public string $posthog_host = '';
 
     public function mount(Project $project): void
     {
@@ -114,6 +139,73 @@ new class extends Component
             'opportunities' => collect(data_get($payload, 'opportunities', []))->take(4)->all(),
             'created_articles' => count(data_get($payload, 'created_articles', [])),
             'generated_articles' => (int) data_get($payload, 'generated_articles', 0),
+        ];
+    }
+
+    #[Computed]
+    public function commercialMetrics(): array
+    {
+        return [
+            'views' => (int) $this->project->articles()->sum('public_view_count'),
+            'cta_clicks' => (int) $this->project->articles()->sum('cta_click_count'),
+            'articles_with_image' => $this->project->articles()->whereNotNull('featured_image_path')->where('featured_image_path', '!=', '')->count(),
+            'articles_with_cta' => $this->project->articles()->whereNotNull('cta')->where('cta', '!=', '')->count(),
+            'articles_with_links' => $this->project->articles()->where('internal_links_count', '>', 0)->count(),
+            'low_seo_articles' => $this->project->articles()->where('status', 'published')->where(function ($query): void {
+                $query->whereNull('seo_score')->orWhere('seo_score', '<', 70);
+            })->count(),
+        ];
+    }
+
+    #[Computed]
+    public function topArticles()
+    {
+        return $this->project->articles()
+            ->where('status', 'published')
+            ->orderByDesc('public_view_count')
+            ->orderByDesc('cta_click_count')
+            ->latest('published_at')
+            ->take(5)
+            ->get();
+    }
+
+    #[Computed]
+    public function editorialAlerts(): array
+    {
+        return [
+            [
+                'label' => 'Sem imagem',
+                'count' => $this->project->articles()->where('status', 'published')->where(function ($query): void {
+                    $query->whereNull('featured_image_path')->orWhere('featured_image_path', '');
+                })->count(),
+                'hint' => 'Artigos publicados sem apoio visual para clique e compartilhamento.',
+            ],
+            [
+                'label' => 'Sem CTA',
+                'count' => $this->project->articles()->where('status', 'published')->where(function ($query): void {
+                    $query->whereNull('cta')->orWhere('cta', '');
+                })->count(),
+                'hint' => 'Paginas publicas sem proximo passo comercial claro.',
+            ],
+            [
+                'label' => 'Sem links internos',
+                'count' => $this->project->articles()->where('status', 'published')->where('internal_links_count', 0)->count(),
+                'hint' => 'Conteudos isolados, com pouca retencao e menos distribuicao de autoridade.',
+            ],
+            [
+                'label' => 'SEO abaixo de 70',
+                'count' => $this->project->articles()->where('status', 'published')->where(function ($query): void {
+                    $query->whereNull('seo_score')->orWhere('seo_score', '<', 70);
+                })->count(),
+                'hint' => 'Paginas que pedem revisao de estrutura, meta e densidade.',
+            ],
+            [
+                'label' => 'Sem introducao editorial',
+                'count' => $this->project->articles()->where('status', 'published')->where(function ($query): void {
+                    $query->whereNull('excerpt')->orWhere('excerpt', '');
+                })->count(),
+                'hint' => 'Artigos que podem estar chegando sem promessa clara para o leitor.',
+            ],
         ];
     }
 
@@ -215,6 +307,11 @@ new class extends Component
             'include_faq' => ['boolean'],
             'target_persona' => ['nullable', 'string', 'max:160'],
             'default_cta' => ['nullable', 'string', 'max:1000'],
+            'hero_description' => ['nullable', 'string', 'max:1000'],
+            'hero_image_url' => ['nullable', 'url', 'max:2048'],
+            'ga4_measurement_id' => ['nullable', 'string', 'max:32'],
+            'posthog_api_key' => ['nullable', 'string', 'max:255'],
+            'posthog_host' => ['nullable', 'url', 'max:255'],
         ]);
 
         $this->project->forceFill([
@@ -226,6 +323,11 @@ new class extends Component
             'google_trends_region' => $validated['google_trends_region'] ?: null,
             'target_persona' => $validated['target_persona'] ?: null,
             'default_cta' => $validated['default_cta'] ?: null,
+            'hero_description' => $validated['hero_description'] ?: null,
+            'hero_image_url' => $validated['hero_image_url'] ?: null,
+            'ga4_measurement_id' => filled($validated['ga4_measurement_id']) ? strtoupper($validated['ga4_measurement_id']) : null,
+            'posthog_api_key' => $validated['posthog_api_key'] ?: null,
+            'posthog_host' => $validated['posthog_host'] ?: null,
         ])->save();
 
         $this->project = $this->project->refresh();
@@ -250,5 +352,10 @@ new class extends Component
         $this->include_faq = $this->project->include_faq;
         $this->target_persona = $this->project->target_persona ?: '';
         $this->default_cta = $this->project->default_cta ?: '';
+        $this->hero_description = $this->project->hero_description ?: '';
+        $this->hero_image_url = $this->project->hero_image_url ?: '';
+        $this->ga4_measurement_id = $this->project->ga4_measurement_id ?: '';
+        $this->posthog_api_key = $this->project->posthog_api_key ?: '';
+        $this->posthog_host = $this->project->posthog_host ?: '';
     }
 };

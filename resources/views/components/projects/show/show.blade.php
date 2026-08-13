@@ -1,4 +1,9 @@
 <section class="space-y-8">
+    @php
+        $heroDescriptionPlaceholder = $project->hero_description ?: 'Conteudos sobre inteligencia artificial aplicada a empresas, com foco em automacao, produtividade e crescimento comercial.';
+        $heroImagePlaceholder = $project->hero_image_url ?: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=80';
+    @endphp
+
     <div class="relative overflow-hidden rounded-[2rem] border border-white/70 bg-zinc-950 p-6 text-white shadow-2xl shadow-zinc-950/10 dark:border-zinc-800">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(132,204,22,0.36),transparent_22rem),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_45%)]"></div>
         <div class="absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-sky-300/20 blur-3xl"></div>
@@ -66,6 +71,71 @@
                 <p class="mt-3 text-3xl font-semibold text-zinc-950 dark:text-white">{{ $value }}</p>
             </div>
         @endforeach
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div class="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-zinc-950/5 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Performance comercial</h2>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Leitura, clique e sinais de conversao do blog publico.</p>
+                </div>
+            </div>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-3">
+                @foreach ([
+                    'Leituras publicas' => $this->commercialMetrics['views'],
+                    'Cliques em CTA' => $this->commercialMetrics['cta_clicks'],
+                    'Artigos com imagem' => $this->commercialMetrics['articles_with_image'],
+                    'Artigos com CTA' => $this->commercialMetrics['articles_with_cta'],
+                    'Artigos com links' => $this->commercialMetrics['articles_with_links'],
+                    'SEO baixo' => $this->commercialMetrics['low_seo_articles'],
+                ] as $label => $value)
+                    <div class="rounded-3xl bg-zinc-50 p-4 dark:bg-zinc-950/40">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">{{ $label }}</p>
+                        <p class="mt-2 text-3xl font-semibold text-zinc-950 dark:text-white">{{ $value }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-6 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
+                <div class="grid grid-cols-[1fr_120px_120px] gap-3 bg-zinc-50 px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:bg-zinc-800">
+                    <span>Artigo</span>
+                    <span>Leituras</span>
+                    <span>CTA</span>
+                </div>
+
+                @forelse ($this->topArticles as $article)
+                    <a wire:key="top-article-{{ $article->id }}" href="{{ route('articles.edit', $article) }}" wire:navigate class="grid grid-cols-[1fr_120px_120px] gap-3 border-t border-zinc-100 px-4 py-4 text-sm transition hover:bg-lime-50 dark:border-zinc-800 dark:hover:bg-zinc-800">
+                        <span>
+                            <span class="block font-medium text-zinc-950 dark:text-white">{{ $article->title }}</span>
+                            <span class="mt-1 block text-xs text-zinc-500">{{ $article->focus_keyword }}</span>
+                        </span>
+                        <span class="text-zinc-600 dark:text-zinc-300">{{ $article->public_view_count }}</span>
+                        <span class="text-zinc-600 dark:text-zinc-300">{{ $article->cta_click_count }}</span>
+                    </a>
+                @empty
+                    <div class="p-6 text-sm text-zinc-500">Ainda nao ha dados publicos suficientes para ranquear artigos.</div>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-zinc-950/5 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85">
+            <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Saude editorial</h2>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Use estes alertas para priorizar revisao, distribuicao e conversao.</p>
+
+            <div class="mt-6 space-y-4">
+                @foreach ($this->editorialAlerts as $alert)
+                    <div class="rounded-3xl border border-zinc-200 bg-white/80 p-5 dark:border-zinc-800 dark:bg-zinc-950/30">
+                        <div class="flex items-center justify-between gap-4">
+                            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">{{ $alert['label'] }}</p>
+                            <span class="text-2xl font-semibold text-zinc-950 dark:text-white">{{ $alert['count'] }}</span>
+                        </div>
+                        <p class="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{{ $alert['hint'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
     </div>
 
     <div class="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-zinc-950/5 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85">
@@ -360,11 +430,37 @@
             <flux:input wire:model="google_trends_country" label="Pais do Trends (ISO-2)" maxlength="2" />
             <flux:input wire:model="google_trends_region" label="Regiao do Trends" />
             <flux:input wire:model="target_persona" label="Persona alvo" />
+            <flux:textarea wire:model="hero_description" label="Texto do Hero" rows="3" placeholder="{{ $heroDescriptionPlaceholder }}" />
+            <flux:input wire:model="hero_image_url" label="Imagem do Hero (URL)" placeholder="{{ $heroImagePlaceholder }}" />
             <flux:textarea wire:model="default_cta" label="CTA padrao" rows="3" />
         </div>
 
         <div class="mt-4">
             <flux:checkbox wire:model="include_faq" label="Adicionar FAQ nos artigos fallback" />
+        </div>
+
+        <div class="mt-8 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-zinc-950 dark:text-white">Analytics e compartilhamento</h3>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Ative GA4, PostHog e deixe cada artigo sair com imagem social propria.</p>
+                </div>
+                @if ($this->topArticles->isNotEmpty())
+                    <a href="{{ route('blogs.article.og-image', [$project->slug, $this->topArticles->first()->slug]) }}" target="_blank" class="text-sm font-medium text-lime-700 transition hover:text-lime-800 dark:text-lime-300 dark:hover:text-lime-200">
+                        Ver exemplo de OG image
+                    </a>
+                @endif
+            </div>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <flux:input wire:model="ga4_measurement_id" label="GA4 Measurement ID" placeholder="G-XXXXXXXXXX" />
+                <flux:input wire:model="posthog_api_key" label="PostHog Project Key" placeholder="phc_..." />
+                <flux:input wire:model="posthog_host" label="PostHog Host" placeholder="https://us.i.posthog.com" />
+            </div>
+
+            <div class="mt-4 rounded-3xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-sm leading-7 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950/30 dark:text-zinc-300">
+                O blog passa a medir visualizacao de pagina, clique em CTA, busca e profundidade de leitura. A imagem social do artigo e gerada automaticamente com identidade editorial do projeto.
+            </div>
         </div>
     </form>
 </section>

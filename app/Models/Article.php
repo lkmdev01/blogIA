@@ -41,6 +41,10 @@ use Illuminate\Support\Str;
     'featured_image_path',
     'featured_image_alt',
     'word_count',
+    'public_view_count',
+    'cta_click_count',
+    'last_viewed_at',
+    'last_cta_clicked_at',
     'source_payload',
 ])]
 class Article extends Model
@@ -71,6 +75,10 @@ class Article extends Model
             'keyword_density' => 'decimal:2',
             'scheduled_for' => 'datetime',
             'published_at' => 'datetime',
+            'public_view_count' => 'int',
+            'cta_click_count' => 'int',
+            'last_viewed_at' => 'datetime',
+            'last_cta_clicked_at' => 'datetime',
         ];
     }
 
