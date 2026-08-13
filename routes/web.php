@@ -9,9 +9,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
-Route::view('/', 'welcome')->name('home');
-
-Route::get('/blogs/{project:slug}', function (Request $request, Project $project) {
+/**
+ * @return array{
+ *     project: Project,
+ *     flow: int,
+ *     search: string,
+ *     selectedCategory: Category|null
+ * }
+ */
+$buildBlogIndexPayload = static function (Request $request, Project $project): array {
     $search = trim((string) $request->string('search'));
     $categorySlug = trim((string) $request->string('category'));
     $flow = max(4, min(40, (int) $request->integer('flow', 8)));
@@ -22,7 +28,7 @@ Route::get('/blogs/{project:slug}', function (Request $request, Project $project
             ->where('slug', $categorySlug)
             ->first();
 
-    return view('blogs.index', [
+    return [
         'project' => $project->load([
             'categories',
             'articles' => fn ($query) => $query
@@ -43,7 +49,21 @@ Route::get('/blogs/{project:slug}', function (Request $request, Project $project
         'flow' => $flow,
         'search' => $search,
         'selectedCategory' => $selectedCategory,
-    ]);
+    ];
+};
+
+Route::get('/', function (Request $request) use ($buildBlogIndexPayload) {
+    $project = Project::query()->oldest('id')->first();
+
+    if (! $project) {
+        return view('welcome');
+    }
+
+    return view('blogs.index', $buildBlogIndexPayload($request, $project));
+})->name('home');
+
+Route::get('/blogs/{project:slug}', function (Request $request, Project $project) use ($buildBlogIndexPayload) {
+    return view('blogs.index', $buildBlogIndexPayload($request, $project));
 })->name('blogs.index');
 
 Route::get('/blogs/{project:slug}/categories/{category}', function (Request $request, Project $project, string $category) {

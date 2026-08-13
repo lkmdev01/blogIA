@@ -11,6 +11,42 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
+test('home page renders the primary blog when a project exists', function () {
+    $project = Project::factory()->for(User::factory())->create([
+        'slug' => 'blog-principal',
+        'name' => 'Blog Principal',
+        'description' => 'Conteudos para consolidar autoridade organica.',
+        'hero_description' => 'Uma operacao editorial unica para concentrar marca, SEO e demanda.',
+        'ga4_measurement_id' => 'G-HOME123456',
+    ]);
+
+    Category::factory()->for($project)->create([
+        'slug' => 'estrategia',
+        'name' => 'Estrategia',
+    ]);
+
+    Article::factory()->for($project)->published()->create([
+        'title' => 'Biblioteca principal',
+        'slug' => 'biblioteca-principal',
+        'excerpt' => 'Leitura central do blog.',
+    ]);
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Blog Principal')
+        ->assertSee('Uma operacao editorial unica para concentrar marca, SEO e demanda.')
+        ->assertSee('window.blogIAAnalytics', false)
+        ->assertSee('G-HOME123456', false)
+        ->assertDontSee('Welcome');
+});
+
+test('home page falls back to welcome when no project exists', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Welcome - BlogIA')
+        ->assertDontSee('window.blogIAAnalytics');
+});
+
 test('published blog pages and sitemap are available publicly', function () {
     Storage::fake('public');
 
