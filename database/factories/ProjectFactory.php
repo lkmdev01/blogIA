@@ -50,6 +50,7 @@ class ProjectFactory extends Factory
             'description' => fake()->paragraph(),
             'hero_description' => fake()->sentence(12),
             'hero_image_url' => fake()->imageUrl(1600, 900, 'business', true),
+            'is_primary_public' => false,
             'ga4_measurement_id' => null,
             'posthog_api_key' => null,
             'posthog_host' => null,

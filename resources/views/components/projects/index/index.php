@@ -76,6 +76,7 @@ new class extends Component
         return auth()->user()
             ->projects()
             ->withCount(['articles', 'pillars', 'clusters'])
+            ->orderByDesc('is_primary_public')
             ->latest()
             ->get();
     }

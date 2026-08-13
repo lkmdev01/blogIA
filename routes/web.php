@@ -163,7 +163,7 @@ $buildArticlePayload = static function (Project $project, string $article): arra
 };
 
 Route::get('/', function (Request $request) use ($buildBlogIndexPayload) {
-    $project = Project::query()->oldest('id')->first();
+    $project = Project::primaryPublic();
 
     if (! $project) {
         return view('welcome');
@@ -181,7 +181,7 @@ Route::get('/blogs/{project:slug}', function (Request $request, Project $project
 })->name('blogs.index');
 
 Route::get('/categories/{category}', function (Request $request, string $category) use ($buildCategoryPayload) {
-    $project = Project::query()->oldest('id')->firstOrFail();
+    $project = Project::primaryPublic() ?? abort(404);
 
     return view('blogs.category', $buildCategoryPayload($request, $project, $category));
 })->name('blogs.primary.category');
@@ -195,7 +195,7 @@ Route::get('/blogs/{project:slug}/categories/{category}', function (Request $req
 })->name('blogs.category');
 
 Route::get('/articles/{article}/social-image.svg', function (string $article) {
-    $project = Project::query()->oldest('id')->firstOrFail();
+    $project = Project::primaryPublic() ?? abort(404);
     $articleModel = Article::query()
         ->where('project_id', $project->id)
         ->where('slug', $article)
@@ -374,7 +374,7 @@ SVG;
 })->name('blogs.article.og-image');
 
 Route::get('/articles/{article}', function (string $article) use ($buildArticlePayload) {
-    $project = Project::query()->oldest('id')->firstOrFail();
+    $project = Project::primaryPublic() ?? abort(404);
 
     return view('blogs.article', $buildArticlePayload($project, $article));
 })->name('blogs.primary.article');
@@ -388,7 +388,7 @@ Route::get('/blogs/{project:slug}/articles/{article}', function (Project $projec
 })->name('blogs.article');
 
 Route::get('/articles/{article}/cta', function (string $article) {
-    $project = Project::query()->oldest('id')->firstOrFail();
+    $project = Project::primaryPublic() ?? abort(404);
     $articleModel = Article::query()
         ->where('project_id', $project->id)
         ->where('slug', $article)

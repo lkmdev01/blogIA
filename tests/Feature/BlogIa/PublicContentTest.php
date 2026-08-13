@@ -40,6 +40,35 @@ test('home page renders the primary blog when a project exists', function () {
         ->assertDontSee('Welcome');
 });
 
+test('home page uses the configured primary blog instead of the oldest project', function () {
+    $originalProject = Project::factory()->for(User::factory())->create([
+        'name' => 'Projeto Antigo',
+        'slug' => 'projeto-antigo',
+        'hero_description' => 'Projeto antigo ainda existe, mas nao lidera a home.',
+        'is_primary_public' => false,
+    ]);
+
+    $primaryProject = Project::factory()->for($originalProject->user)->create([
+        'name' => 'Projeto Principal',
+        'slug' => 'projeto-principal',
+        'hero_description' => 'Esta e a mensagem que precisa aparecer na home publica.',
+        'is_primary_public' => true,
+        'ga4_measurement_id' => 'G-PRIMARY999',
+    ]);
+
+    Article::factory()->for($primaryProject)->published()->create([
+        'title' => 'Leitura principal',
+        'slug' => 'leitura-principal',
+    ]);
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Projeto Principal')
+        ->assertSee('Esta e a mensagem que precisa aparecer na home publica.')
+        ->assertSee('G-PRIMARY999', false)
+        ->assertDontSee('Projeto antigo ainda existe, mas nao lidera a home.');
+});
+
 test('home page falls back to welcome when no project exists', function () {
     $this->get(route('home'))
         ->assertOk()

@@ -10,7 +10,12 @@
 
         <div class="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div class="max-w-3xl">
-                <p class="text-sm font-semibold uppercase tracking-[0.28em] text-lime-200">Projeto SEO</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-sm font-semibold uppercase tracking-[0.28em] text-lime-200">Projeto SEO</p>
+                    @if ($project->isPrimaryPublicProject())
+                        <span class="rounded-full border border-lime-200/40 bg-lime-300/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-lime-100">Blog principal</span>
+                    @endif
+                </div>
                 <h1 class="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">{{ $project->name }}</h1>
                 <p class="mt-3 max-w-2xl text-sm leading-6 text-zinc-300 md:text-base">{{ $project->description ?: 'Sem descricao.' }}</p>
                 <div class="mt-5 flex flex-wrap gap-2 text-xs text-zinc-100">
@@ -47,6 +52,9 @@
                 </flux:button>
                 <flux:button wire:click="generateNextArticle">Gerar proximo artigo</flux:button>
                 <flux:button wire:click="refreshSitemap" variant="ghost">Atualizar sitemap</flux:button>
+                @unless ($project->isPrimaryPublicProject())
+                    <flux:button wire:click="setAsPrimaryPublicProject" variant="ghost">Definir como blog principal</flux:button>
+                @endunless
                 <flux:button :href="$project->publicIndexUrl()" target="_blank" variant="ghost">Ver blog</flux:button>
             </div>
         </div>

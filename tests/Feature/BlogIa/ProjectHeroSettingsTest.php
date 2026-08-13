@@ -24,6 +24,7 @@ test('project can be created with hero content defaults from dashboard', functio
     $project = Project::query()->where('slug', 'hero-blog')->first();
 
     expect($project)->not->toBeNull()
+        ->and($project?->is_primary_public)->toBeTrue()
         ->and($project?->hero_description)->toBe('Conteudos sobre IA para liderancas comerciais.')
         ->and($project?->hero_image_url)->toBe('https://cdn.example.com/hero-create.jpg');
 });
@@ -85,6 +86,28 @@ test('project analytics settings can be updated from dashboard', function () {
     expect($project->ga4_measurement_id)->toBe('G-4N4LYT1CS')
         ->and($project->posthog_api_key)->toBe('phc_test_project_key')
         ->and($project->posthog_host)->toBe('https://us.i.posthog.com');
+});
+
+test('project can be promoted to primary public blog from dashboard', function () {
+    $user = User::factory()->create();
+    $primaryProject = Project::factory()->for($user)->create([
+        'name' => 'Projeto Original',
+        'is_primary_public' => true,
+    ]);
+    $candidateProject = Project::factory()->for($user)->create([
+        'name' => 'Projeto Principal Novo',
+        'is_primary_public' => false,
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('projects.show', ['project' => $candidateProject])
+        ->call('setAsPrimaryPublicProject')
+        ->assertHasNoErrors();
+
+    expect($candidateProject->fresh()->is_primary_public)->toBeTrue()
+        ->and($candidateProject->fresh()->isPrimaryPublicProject())->toBeTrue()
+        ->and($primaryProject->fresh()->is_primary_public)->toBeFalse();
 });
 
 test('project hero placeholders mirror the public fallback content in dashboard', function () {

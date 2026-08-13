@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Fillable([
@@ -24,6 +25,7 @@ use Illuminate\Support\Str;
     'description',
     'hero_description',
     'hero_image_url',
+    'is_primary_public',
     'ga4_measurement_id',
     'posthog_api_key',
     'posthog_host',
@@ -58,6 +60,10 @@ class Project extends Model
     /** @use HasFactory<ProjectFactory> */
     use HasFactory;
 
+    protected static ?int $resolvedPrimaryPublicProjectId = null;
+
+    protected static bool $hasResolvedPrimaryPublicProjectId = false;
+
     protected static function booted(): void
     {
         static::saving(function (self $project): void {
@@ -65,11 +71,50 @@ class Project extends Model
                 $project->slug = Str::slug($project->name);
             }
         });
+
+        static::created(function (self $project): void {
+            if ($project->is_primary_public) {
+                $project->setAsPrimaryPublic();
+            } elseif (static::query()->where('is_primary_public', true)->doesntExist()) {
+                $project->forceFill(['is_primary_public' => true])->saveQuietly();
+            }
+
+            static::forgetResolvedPrimaryPublicProject();
+        });
+
+        static::saved(fn (): bool => static::forgetResolvedPrimaryPublicProject());
+        static::deleted(fn (): bool => static::forgetResolvedPrimaryPublicProject());
     }
 
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public static function primaryPublic(): ?self
+    {
+        $primaryProjectId = static::resolvePrimaryPublicProjectId();
+
+        return $primaryProjectId ? static::query()->find($primaryProjectId) : null;
+    }
+
+    public function setAsPrimaryPublic(): void
+    {
+        if (! $this->exists) {
+            return;
+        }
+
+        DB::transaction(function (): void {
+            static::query()
+                ->where('is_primary_public', true)
+                ->whereKeyNot($this->getKey())
+                ->update(['is_primary_public' => false]);
+
+            $this->forceFill(['is_primary_public' => true])->saveQuietly();
+        });
+
+        static::forgetResolvedPrimaryPublicProject();
+        $this->refresh();
     }
 
     public function isPrimaryPublicProject(): bool
@@ -78,7 +123,7 @@ class Project extends Model
             return false;
         }
 
-        $primaryProjectId = static::query()->oldest('id')->value('id');
+        $primaryProjectId = static::resolvePrimaryPublicProjectId();
 
         return $primaryProjectId !== null && $this->getKey() === (int) $primaryProjectId;
     }
@@ -182,6 +227,25 @@ class Project extends Model
         ], fn ($value) => filled($value)));
     }
 
+    protected static function resolvePrimaryPublicProjectId(): ?int
+    {
+        if (! static::$hasResolvedPrimaryPublicProjectId) {
+            static::$resolvedPrimaryPublicProjectId = static::query()->where('is_primary_public', true)->value('id')
+                ?? static::query()->oldest('id')->value('id');
+            static::$hasResolvedPrimaryPublicProjectId = true;
+        }
+
+        return static::$resolvedPrimaryPublicProjectId;
+    }
+
+    protected static function forgetResolvedPrimaryPublicProject(): bool
+    {
+        static::$resolvedPrimaryPublicProjectId = null;
+        static::$hasResolvedPrimaryPublicProjectId = false;
+
+        return true;
+    }
+
     /**
      * @return array<string, string>
      */
@@ -193,6 +257,7 @@ class Project extends Model
             'enable_interlinking' => 'bool',
             'auto_generate_content' => 'bool',
             'auto_publish' => 'bool',
+            'is_primary_public' => 'bool',
             'generation_batch_size' => 'int',
             'generation_delay_seconds' => 'int',
             'h2_count' => 'int',

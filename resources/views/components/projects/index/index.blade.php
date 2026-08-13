@@ -1,6 +1,6 @@
 <section class="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
     <div class="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-zinc-950/5 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85">
-        <p class="text-sm font-semibold uppercase tracking-[0.25em] text-lime-700 dark:text-lime-300">Novo blog</p>
+        <p class="text-sm font-semibold uppercase tracking-[0.25em] text-lime-700 dark:text-lime-300">Nova frente editorial</p>
         <h1 class="mt-3 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white">Cadastrar projeto</h1>
         <p class="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">Configure nicho, tom, frequencia e automacoes. Imagens ficam desativadas por padrao para voce criar depois no editor.</p>
 
@@ -82,7 +82,7 @@
         <div class="flex items-center justify-between gap-4">
             <div>
                 <h2 class="text-2xl font-semibold text-zinc-950 dark:text-white">Meus projetos</h2>
-                <p class="text-sm text-zinc-500 dark:text-zinc-400">Blogs configurados para escalar SEO.</p>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400">Projetos configurados para operar o blog principal.</p>
             </div>
         </div>
 
@@ -91,7 +91,12 @@
                 <a wire:key="project-card-{{ $project->id }}" href="{{ route('projects.show', $project) }}" wire:navigate class="rounded-3xl border border-zinc-200/80 bg-white/70 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-lime-400 hover:bg-lime-50/70 dark:border-zinc-800 dark:bg-zinc-950/30 dark:hover:bg-zinc-800">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <h3 class="font-semibold text-zinc-950 dark:text-white">{{ $project->name }}</h3>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="font-semibold text-zinc-950 dark:text-white">{{ $project->name }}</h3>
+                                @if ($project->isPrimaryPublicProject())
+                                    <span class="rounded-full bg-lime-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-lime-800 dark:bg-lime-400/10 dark:text-lime-200">Blog principal</span>
+                                @endif
+                            </div>
                             <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                                 {{ $project->niche }}
                                 @if ($project->target_location)

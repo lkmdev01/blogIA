@@ -290,6 +290,14 @@ new class extends Component
         Flux::toast(variant: 'success', text: 'Sitemap atualizado.');
     }
 
+    public function setAsPrimaryPublicProject(): void
+    {
+        $this->project->setAsPrimaryPublic();
+        $this->project = $this->project->refresh();
+
+        Flux::toast(variant: 'success', text: 'Este projeto agora responde como blog principal publico.');
+    }
+
     public function saveGenerationSettings(): void
     {
         $validated = $this->validate([

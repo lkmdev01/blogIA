@@ -48,7 +48,12 @@
                 @forelse ($this->projects as $project)
                     <div wire:key="dashboard-project-{{ $project->id }}" class="flex flex-col gap-4 py-5 lg:flex-row lg:items-center lg:justify-between">
                         <div>
-                            <a href="{{ route('projects.show', $project) }}" wire:navigate class="text-lg font-semibold text-zinc-950 hover:underline dark:text-white">{{ $project->name }}</a>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <a href="{{ route('projects.show', $project) }}" wire:navigate class="text-lg font-semibold text-zinc-950 hover:underline dark:text-white">{{ $project->name }}</a>
+                                @if ($project->isPrimaryPublicProject())
+                                    <span class="rounded-full bg-lime-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-lime-800 dark:bg-lime-400/10 dark:text-lime-200">Blog principal</span>
+                                @endif
+                            </div>
                             <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ $project->niche }} · {{ implode(', ', $project->primary_keywords ?? []) }}</p>
                             <div class="mt-3 flex flex-wrap gap-2 text-xs text-zinc-600 dark:text-zinc-300">
                                 <span class="rounded-full bg-zinc-100 px-3 py-1 dark:bg-zinc-800">{{ $project->articles_count }} artigos</span>
