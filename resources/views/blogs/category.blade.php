@@ -6,8 +6,7 @@
         @php
             $pageTitle = ($category->seo_title ?: $category->name).' - '.$project->name;
             $pageDescription = $category->seo_description ?: $category->description ?: 'Leituras para liderancas que precisam transformar estrategia em execucao.';
-            $canonicalUrl = route('blogs.category', array_filter([
-                'project' => $project->slug,
+            $canonicalUrl = $project->publicCategoryUrl($category, array_filter([
                 'category' => $category->slug,
                 'order' => ($order ?? 'recent') !== 'recent' ? $order : null,
                 'flow' => ($flow ?? 8) > 8 ? $flow : null,
@@ -43,7 +42,7 @@
             <section class="overflow-hidden rounded-lg bg-zinc-950 text-white">
                 <div class="border-b border-white/10 px-6 py-5 md:px-10">
                     <nav class="flex flex-wrap items-center gap-2 text-sm text-zinc-300">
-                        <a href="{{ route('blogs.index', $project->slug) }}" class="font-medium text-emerald-300 transition hover:text-white">{{ $project->name }}</a>
+                        <a href="{{ $project->publicIndexUrl() }}" class="font-medium text-emerald-300 transition hover:text-white">{{ $project->name }}</a>
                         <span>/</span>
                         <span class="text-zinc-400">{{ $category->name }}</span>
                     </nav>
@@ -76,7 +75,7 @@
                         <div class="px-6 py-6">
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Destaque editorial</p>
                             <h2 class="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
-                                <a href="{{ route('blogs.article', [$project->slug, $featuredArticle->slug]) }}" class="transition hover:text-emerald-700">{{ $featuredArticle->title }}</a>
+                                <a href="{{ $project->publicArticleUrl($featuredArticle) }}" class="transition hover:text-emerald-700">{{ $featuredArticle->title }}</a>
                             </h2>
                             <div class="mt-3 flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
                                 <span>{{ $featuredArticle->published_at?->format('d/m/Y') }}</span>
@@ -86,13 +85,13 @@
                                 @endif
                             </div>
                             <p class="mt-4 text-sm leading-7 text-zinc-600">{{ $featuredArticle->excerpt ?: $featuredArticle->meta_description }}</p>
-                            <a href="{{ route('blogs.article', [$project->slug, $featuredArticle->slug]) }}" class="mt-5 inline-flex text-sm font-semibold text-emerald-700 transition hover:text-emerald-900">Ler destaque</a>
+                            <a href="{{ $project->publicArticleUrl($featuredArticle) }}" class="mt-5 inline-flex text-sm font-semibold text-emerald-700 transition hover:text-emerald-900">Ler destaque</a>
                         </div>
                     </article>
 
                     <aside class="rounded-lg border border-zinc-200 bg-white px-5 py-5">
                         <p class="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">Ordenar biblioteca</p>
-                        <form method="GET" action="{{ route('blogs.category', [$project->slug, $category->slug]) }}" class="mt-4 space-y-3">
+                        <form method="GET" action="{{ $project->publicCategoryUrl($category) }}" class="mt-4 space-y-3">
                             <select name="order" class="h-12 w-full rounded-md border border-zinc-200 bg-white px-4 text-sm text-zinc-700 outline-none">
                                 <option value="recent" @selected(($order ?? 'recent') === 'recent')>Mais recentes</option>
                                 <option value="popular" @selected(($order ?? 'recent') === 'popular')>Mais lidos</option>
@@ -120,10 +119,10 @@
                             @endif
                         </div>
                         <h2 class="mt-3 max-w-4xl text-2xl font-semibold tracking-tight">
-                            <a href="{{ route('blogs.article', [$project->slug, $article->slug]) }}" class="transition hover:text-emerald-700">{{ $article->title }}</a>
+                            <a href="{{ $project->publicArticleUrl($article) }}" class="transition hover:text-emerald-700">{{ $article->title }}</a>
                         </h2>
                         <p class="mt-3 max-w-3xl leading-7 text-zinc-600">{{ $article->excerpt ?: $article->meta_description }}</p>
-                        <a href="{{ route('blogs.article', [$project->slug, $article->slug]) }}" class="mt-4 inline-flex items-center text-sm font-semibold text-emerald-700 transition hover:text-emerald-900">Ler artigo</a>
+                        <a href="{{ $project->publicArticleUrl($article) }}" class="mt-4 inline-flex items-center text-sm font-semibold text-emerald-700 transition hover:text-emerald-900">Ler artigo</a>
                     </article>
                 @empty
                     <p class="py-8 text-zinc-600">Nenhum artigo publicado nesta categoria.</p>
@@ -131,7 +130,7 @@
 
                 @if ($hasMoreArticles)
                     <div class="pt-10">
-                        <a href="{{ route('blogs.category', ['project' => $project->slug, 'category' => $category->slug, 'order' => $order !== 'recent' ? $order : null, 'flow' => $nextFlowLimit]) }}" class="inline-flex items-center rounded-md bg-emerald-300 px-6 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-950 transition hover:bg-emerald-200">
+                        <a href="{{ $project->publicCategoryUrl($category, ['order' => $order !== 'recent' ? $order : null, 'flow' => $nextFlowLimit]) }}" class="inline-flex items-center rounded-md bg-emerald-300 px-6 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-950 transition hover:bg-emerald-200">
                             Ver mais artigos
                         </a>
                     </div>

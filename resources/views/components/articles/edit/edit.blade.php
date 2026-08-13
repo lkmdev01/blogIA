@@ -15,7 +15,7 @@
                 </flux:button>
                 <flux:button wire:click="refreshLinks" variant="ghost">Atualizar links</flux:button>
                 <flux:button wire:click="publish" variant="ghost">Publicar</flux:button>
-                <flux:button :href="route('blogs.article', [$article->project->slug, $article->slug])" target="_blank" variant="ghost">Ver post</flux:button>
+                <flux:button :href="$article->project->publicArticleUrl($article)" target="_blank" variant="ghost">Ver post</flux:button>
             </div>
         </div>
     </div>
@@ -114,7 +114,7 @@
                 <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Interlinkagem</h2>
                 <div class="mt-4 space-y-3">
                     @forelse ($article->internalLinks as $link)
-                        <a wire:key="internal-link-{{ $link->id }}" href="{{ route('blogs.article', [$article->project->slug, $link->linkedArticle->slug]) }}" target="_blank" class="block rounded-2xl bg-lime-50/70 p-3 text-sm ring-1 ring-lime-900/5 dark:bg-zinc-800 dark:ring-white/5">
+                        <a wire:key="internal-link-{{ $link->id }}" href="{{ $article->project->publicArticleUrl($link->linkedArticle) }}" target="_blank" class="block rounded-2xl bg-lime-50/70 p-3 text-sm ring-1 ring-lime-900/5 dark:bg-zinc-800 dark:ring-white/5">
                             <span class="block font-medium text-zinc-950 dark:text-white">{{ $link->anchor_text }}</span>
                             <span class="text-xs text-zinc-500">{{ $link->context }} · {{ $link->linkedArticle->title }}</span>
                         </a>

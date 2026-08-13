@@ -72,6 +72,116 @@ class Project extends Model
         return 'slug';
     }
 
+    public function isPrimaryPublicProject(): bool
+    {
+        if (! $this->exists) {
+            return false;
+        }
+
+        $primaryProjectId = static::query()->oldest('id')->value('id');
+
+        return $primaryProjectId !== null && $this->getKey() === (int) $primaryProjectId;
+    }
+
+    /**
+     * @param  array<string, scalar|null>  $query
+     */
+    public function publicIndexUrl(array $query = []): string
+    {
+        if ($this->isPrimaryPublicProject()) {
+            return route('home', array_filter($query, fn ($value) => filled($value)));
+        }
+
+        return route('blogs.index', array_filter([
+            'project' => $this->slug,
+            ...$query,
+        ], fn ($value) => filled($value)));
+    }
+
+    /**
+     * @param  array<string, scalar|null>  $query
+     */
+    public function publicCategoryUrl(Category|string $category, array $query = []): string
+    {
+        $categorySlug = $category instanceof Category ? $category->slug : $category;
+
+        if ($this->isPrimaryPublicProject()) {
+            return route('blogs.primary.category', array_filter([
+                'category' => $categorySlug,
+                ...$query,
+            ], fn ($value) => filled($value)));
+        }
+
+        return route('blogs.category', array_filter([
+            'project' => $this->slug,
+            'category' => $categorySlug,
+            ...$query,
+        ], fn ($value) => filled($value)));
+    }
+
+    /**
+     * @param  array<string, scalar|null>  $query
+     */
+    public function publicArticleUrl(Article|string $article, array $query = []): string
+    {
+        $articleSlug = $article instanceof Article ? $article->slug : $article;
+
+        if ($this->isPrimaryPublicProject()) {
+            return route('blogs.primary.article', array_filter([
+                'article' => $articleSlug,
+                ...$query,
+            ], fn ($value) => filled($value)));
+        }
+
+        return route('blogs.article', array_filter([
+            'project' => $this->slug,
+            'article' => $articleSlug,
+            ...$query,
+        ], fn ($value) => filled($value)));
+    }
+
+    /**
+     * @param  array<string, scalar|null>  $query
+     */
+    public function publicArticleSocialImageUrl(Article|string $article, array $query = []): string
+    {
+        $articleSlug = $article instanceof Article ? $article->slug : $article;
+
+        if ($this->isPrimaryPublicProject()) {
+            return route('blogs.primary.article.og-image', array_filter([
+                'article' => $articleSlug,
+                ...$query,
+            ], fn ($value) => filled($value)));
+        }
+
+        return route('blogs.article.og-image', array_filter([
+            'project' => $this->slug,
+            'article' => $articleSlug,
+            ...$query,
+        ], fn ($value) => filled($value)));
+    }
+
+    /**
+     * @param  array<string, scalar|null>  $query
+     */
+    public function publicArticleCtaUrl(Article|string $article, array $query = []): string
+    {
+        $articleSlug = $article instanceof Article ? $article->slug : $article;
+
+        if ($this->isPrimaryPublicProject()) {
+            return route('blogs.primary.article.cta', array_filter([
+                'article' => $articleSlug,
+                ...$query,
+            ], fn ($value) => filled($value)));
+        }
+
+        return route('blogs.article.cta', array_filter([
+            'project' => $this->slug,
+            'article' => $articleSlug,
+            ...$query,
+        ], fn ($value) => filled($value)));
+    }
+
     /**
      * @return array<string, string>
      */

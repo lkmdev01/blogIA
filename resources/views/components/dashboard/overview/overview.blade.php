@@ -39,7 +39,7 @@
             <div class="flex items-center justify-between gap-4">
                 <div>
                     <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Projetos ativos</h2>
-                    <p class="text-sm text-zinc-500 dark:text-zinc-400">Cada projeto representa um blog com nicho, tom, pauta e automacao propria.</p>
+                    <p class="text-sm text-zinc-500 dark:text-zinc-400">Cada projeto organiza uma frente editorial com nicho, tom, pauta e automacao propria dentro do blog principal.</p>
                 </div>
                 <flux:button :href="route('projects.index')" wire:navigate variant="primary">Novo projeto</flux:button>
             </div>
@@ -62,7 +62,7 @@
                                 <span wire:loading.remove wire:target="generateStrategy({{ $project->id }})">Gerar pauta + artigos</span>
                                 <span wire:loading wire:target="generateStrategy({{ $project->id }})">Gerando...</span>
                             </flux:button>
-                            <flux:button size="sm" variant="ghost" :href="route('blogs.index', $project)" target="_blank">Ver blog</flux:button>
+                            <flux:button size="sm" variant="ghost" :href="$project->publicIndexUrl()" target="_blank">Ver blog</flux:button>
                         </div>
                     </div>
                 @empty

@@ -5,8 +5,7 @@
         : ((isset($selectedCategory) && $selectedCategory) ? $selectedCategory->name.' - '.$project->name : $project->name);
     $pageDescription = $project->hero_description ?: ($project->description ?: 'Conteudos sobre inteligencia artificial aplicada a empresas, com foco em automacao, produtividade e crescimento comercial.');
     $pageImage = $project->hero_image_url ?: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=80';
-    $canonicalUrl = route('blogs.index', array_filter([
-        'project' => $project->slug,
+    $canonicalUrl = $project->publicIndexUrl(array_filter([
         'search' => $search !== '' ? $search : null,
         'category' => isset($selectedCategory) && $selectedCategory ? $selectedCategory->slug : null,
         'flow' => ($flow ?? 8) > 8 ? $flow : null,
@@ -98,7 +97,7 @@
                             <a href="#frentes" class="transition hover:text-emerald-700">Frentes</a>
                         </nav>
 
-                        <a href="{{ route('blogs.index', $project->slug) }}" class="flex flex-col items-center justify-center leading-none">
+                        <a href="{{ $project->publicIndexUrl() }}" class="flex flex-col items-center justify-center leading-none">
                             <span class="text-[10px] tracking-[0.32em] text-zinc-500">INOVAFORCE</span>
                             <span class="mt-2 text-xs tracking-[0.28em] text-zinc-900">{{ $project->name }}</span>
                         </a>
@@ -129,7 +128,7 @@
                         <h1 class="mt-5 text-4xl font-semibold tracking-tight md:text-6xl">{{ $project->name }}</h1>
                         <p class="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-200 md:text-lg">{{ $pageDescription }}</p>
 
-                        <form method="GET" action="{{ route('blogs.index', $project->slug) }}" class="mx-auto mt-8 max-w-4xl" data-blog-search-form>
+                        <form method="GET" action="{{ $project->publicIndexUrl() }}" class="mx-auto mt-8 max-w-4xl" data-blog-search-form>
                             <label for="blog-search" class="sr-only">Buscar no blog</label>
                             <div class="overflow-hidden rounded-md bg-white shadow-2xl shadow-zinc-950/20 ring-1 ring-zinc-200">
                                 <div class="flex flex-col md:flex-row">
@@ -170,7 +169,7 @@
                                 @if (isset($selectedCategory) && $selectedCategory)
                                     <p>Categoria <span class="font-medium text-white">{{ $selectedCategory->name }}</span></p>
                                 @endif
-                                <a href="{{ route('blogs.index', $project->slug) }}" class="font-medium text-emerald-300 transition hover:text-white">Limpar filtros</a>
+                                <a href="{{ $project->publicIndexUrl() }}" class="font-medium text-emerald-300 transition hover:text-white">Limpar filtros</a>
                             </div>
                         @endif
 
@@ -199,7 +198,7 @@
                 <section id="leituras" class="py-10">
                     <div class="grid gap-8 xl:grid-cols-[minmax(0,1.45fr)_minmax(0,0.85fr)_280px]">
                         <article class="border-b border-zinc-200 pb-8 xl:border-b-0">
-                            <a href="{{ route('blogs.article', [$project->slug, $featuredArticle->slug]) }}" class="block overflow-hidden bg-zinc-100">
+                            <a href="{{ $project->publicArticleUrl($featuredArticle) }}" class="block overflow-hidden bg-zinc-100">
                                 <img
                                     src="{{ $resolveImage($featuredArticle, 0) }}"
                                     alt="{{ $featuredArticle->featured_image_alt ?: $featuredArticle->title }}"
@@ -214,16 +213,16 @@
                                 <span>{{ $featuredArticle->published_at?->format('d/m/Y') }}</span>
                             </div>
                             <h2 class="mt-4 max-w-3xl text-3xl font-semibold tracking-tight md:text-4xl">
-                                <a href="{{ route('blogs.article', [$project->slug, $featuredArticle->slug]) }}" class="transition hover:text-emerald-700">{{ $featuredArticle->title }}</a>
+                                <a href="{{ $project->publicArticleUrl($featuredArticle) }}" class="transition hover:text-emerald-700">{{ $featuredArticle->title }}</a>
                             </h2>
                             <p class="mt-4 max-w-3xl text-base leading-8 text-zinc-600">{!! $highlightText($featuredArticle->excerpt ?: $featuredArticle->meta_description, 240) !!}</p>
-                            <a href="{{ route('blogs.article', [$project->slug, $featuredArticle->slug]) }}" class="mt-5 inline-flex items-center text-sm font-semibold text-emerald-700 transition hover:text-emerald-900">Ler analise</a>
+                            <a href="{{ $project->publicArticleUrl($featuredArticle) }}" class="mt-5 inline-flex items-center text-sm font-semibold text-emerald-700 transition hover:text-emerald-900">Ler analise</a>
                         </article>
 
                         <div class="space-y-8 border-b border-zinc-200 pb-8 xl:border-b-0">
                             @foreach ($secondaryArticles as $index => $article)
                                 <article>
-                                    <a href="{{ route('blogs.article', [$project->slug, $article->slug]) }}" class="block overflow-hidden bg-zinc-100">
+                                    <a href="{{ $project->publicArticleUrl($article) }}" class="block overflow-hidden bg-zinc-100">
                                         <img
                                             src="{{ $resolveImage($article, $index + 1) }}"
                                             alt="{{ $article->featured_image_alt ?: $article->title }}"
@@ -237,7 +236,7 @@
                                         <span>{{ $article->published_at?->format('d/m/Y') }}</span>
                                     </div>
                                     <h3 class="mt-3 text-2xl font-semibold tracking-tight">
-                                        <a href="{{ route('blogs.article', [$project->slug, $article->slug]) }}" class="transition hover:text-emerald-700">{{ $article->title }}</a>
+                                        <a href="{{ $project->publicArticleUrl($article) }}" class="transition hover:text-emerald-700">{{ $article->title }}</a>
                                     </h3>
                                     <p class="mt-3 text-sm leading-7 text-zinc-600">{!! $highlightText($article->excerpt ?: $article->meta_description, 120) !!}</p>
                                 </article>
@@ -249,7 +248,7 @@
                                 <h3 class="text-2xl font-semibold tracking-tight">Topicos</h3>
                                 <div class="mt-5 space-y-3">
                                     @foreach ($project->categories->take(6) as $category)
-                                        <a href="{{ route('blogs.category', [$project->slug, $category->slug]) }}" class="block text-sm text-zinc-600 transition hover:text-emerald-700">{{ $category->name }}</a>
+                                        <a href="{{ $project->publicCategoryUrl($category) }}" class="block text-sm text-zinc-600 transition hover:text-emerald-700">{{ $category->name }}</a>
                                     @endforeach
                                 </div>
                             </div>
@@ -266,7 +265,7 @@
                                                 {{ $selectedCategory->name }}
                                             </div>
                                         @endif
-                                        <a href="{{ route('blogs.index', $project->slug) }}" class="inline-flex text-sm font-medium text-emerald-700 transition hover:text-emerald-900">Limpar busca</a>
+                                        <a href="{{ $project->publicIndexUrl() }}" class="inline-flex text-sm font-medium text-emerald-700 transition hover:text-emerald-900">Limpar busca</a>
                                     @else
                                         <div class="space-y-3 text-sm text-zinc-600">
                                             <div class="flex items-center justify-between gap-3 border-b border-zinc-200 pb-3">
@@ -312,7 +311,7 @@
                 <div class="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
                     @forelse ($visibleGridArticles as $article)
                         <article>
-                            <a href="{{ route('blogs.article', [$project->slug, $article->slug]) }}" class="block overflow-hidden bg-zinc-100">
+                            <a href="{{ $project->publicArticleUrl($article) }}" class="block overflow-hidden bg-zinc-100">
                                 <img
                                     src="{{ $resolveImage($article, $loop->index + 3) }}"
                                     alt="{{ $article->featured_image_alt ?: $article->title }}"
@@ -326,7 +325,7 @@
                                 <span>{{ $article->published_at?->format('d/m/Y') }}</span>
                             </div>
                             <h3 class="mt-3 text-xl font-semibold tracking-tight">
-                                <a href="{{ route('blogs.article', [$project->slug, $article->slug]) }}" class="transition hover:text-emerald-700">{{ $article->title }}</a>
+                                <a href="{{ $project->publicArticleUrl($article) }}" class="transition hover:text-emerald-700">{{ $article->title }}</a>
                             </h3>
                             <p class="mt-3 text-sm leading-7 text-zinc-600">{!! $highlightText($article->excerpt ?: $article->meta_description, 120) !!}</p>
                         </article>
@@ -337,7 +336,7 @@
                                 <p class="mt-3 text-sm text-zinc-500">Tente buscar por outro termo, remover o filtro de categoria ou navegar pelos topicos em destaque.</p>
                                 <div class="mt-5 flex flex-wrap justify-center gap-2">
                                     @foreach ($project->categories->take(4) as $category)
-                                        <a href="{{ route('blogs.index', ['project' => $project->slug, 'category' => $category->slug]) }}" class="rounded-full border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 transition hover:border-emerald-300 hover:text-emerald-700">
+                                        <a href="{{ $project->publicIndexUrl(['category' => $category->slug]) }}" class="rounded-full border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 transition hover:border-emerald-300 hover:text-emerald-700">
                                             {{ $category->name }}
                                         </a>
                                     @endforeach
@@ -350,7 +349,11 @@
                 @if ($hasMoreGridArticles)
                     <div class="mt-10 flex justify-center">
                         <a
-                            href="{{ route('blogs.index', ['project' => $project->slug, 'search' => $search !== '' ? $search : null, 'flow' => $nextFlowLimit]) }}#biblioteca"
+                            href="{{ $project->publicIndexUrl([
+                                'search' => $search !== '' ? $search : null,
+                                'category' => isset($selectedCategory) && $selectedCategory ? $selectedCategory->slug : null,
+                                'flow' => $nextFlowLimit,
+                            ]) }}#biblioteca"
                             class="inline-flex items-center rounded-md bg-emerald-300 px-6 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-950 transition hover:bg-emerald-200"
                         >
                             Ver mais artigos
@@ -372,7 +375,7 @@
                     <h3 class="text-sm font-semibold uppercase tracking-[0.22em] text-zinc-400">Categorias</h3>
                     <div class="mt-4 space-y-3">
                         @foreach ($project->categories->take(6) as $category)
-                            <a href="{{ route('blogs.category', [$project->slug, $category->slug]) }}" class="block text-sm text-zinc-300 transition hover:text-white">{{ $category->name }}</a>
+                            <a href="{{ $project->publicCategoryUrl($category) }}" class="block text-sm text-zinc-300 transition hover:text-white">{{ $category->name }}</a>
                         @endforeach
                     </div>
                 </div>

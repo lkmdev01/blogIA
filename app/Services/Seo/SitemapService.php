@@ -72,7 +72,7 @@ XML;
 
         $urls = collect([
             [
-                'loc' => route('blogs.index', ['project' => $project->slug]),
+                'loc' => $project->publicIndexUrl(),
                 'lastmod' => $project->updated_at->toAtomString(),
                 'changefreq' => 'daily',
                 'priority' => '1.0',
@@ -80,7 +80,7 @@ XML;
         ]);
 
         $categoryUrls = $project->categories->map(fn ($category): array => [
-            'loc' => route('blogs.category', ['project' => $project->slug, 'category' => $category->slug]),
+            'loc' => $project->publicCategoryUrl($category),
             'lastmod' => $category->updated_at->toAtomString(),
             'changefreq' => 'weekly',
             'priority' => '0.7',
@@ -89,7 +89,7 @@ XML;
         $articleUrls = $project->articles
             ->where('status', 'published')
             ->map(fn ($article): array => [
-                'loc' => route('blogs.article', ['project' => $project->slug, 'article' => $article->slug]),
+                'loc' => $project->publicArticleUrl($article),
                 'lastmod' => optional($article->published_at ?: $article->updated_at)?->toAtomString() ?: now()->toAtomString(),
                 'changefreq' => 'weekly',
                 'priority' => $article->is_pillar_page ? '0.9' : '0.8',

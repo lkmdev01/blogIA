@@ -118,7 +118,7 @@ test('published blog pages and sitemap are available publicly', function () {
 
     app(SitemapService::class)->store($project);
 
-    $this->get(route('blogs.index', $project->slug))
+    $this->get(route('home'))
         ->assertOk()
         ->assertSee('BlogIA Public')
         ->assertSee('Conteudos sob medida para liderancas que querem aplicar IA com clareza comercial.')
@@ -131,41 +131,39 @@ test('published blog pages and sitemap are available publicly', function () {
         ->assertSee('Todas as categorias')
         ->assertSee('Ver mais artigos');
 
-    $this->get(route('blogs.index', ['project' => $project->slug, 'search' => 'atendimento']))
+    $this->get($project->publicIndexUrl(['search' => 'atendimento']))
         ->assertOk()
         ->assertSee('Resultados para')
         ->assertSee('Automacao com IA para atendimento')
         ->assertDontSee('SEO com IA para marcas');
 
-    $this->get(route('blogs.index', ['project' => $project->slug, 'search' => 'atendimento', 'category' => $category->slug]))
+    $this->get($project->publicIndexUrl(['search' => 'atendimento', 'category' => $category->slug]))
         ->assertOk()
         ->assertSee('Categoria')
         ->assertSee('SEO com IA')
         ->assertSee('<mark class="rounded bg-emerald-100 px-1 text-zinc-950">Atendimento</mark>', false);
 
-    $this->get(route('blogs.index', ['project' => $project->slug, 'flow' => 16]))
+    $this->get($project->publicIndexUrl(['flow' => 16]))
         ->assertOk()
         ->assertSee('Biblioteca extra 10');
 
-    $this->get(route('blogs.category', [$project->slug, $category->slug]))
+    $this->get($project->publicCategoryUrl($category))
         ->assertOk()
         ->assertSee('SEO com IA')
         ->assertSee('Destaque editorial')
         ->assertSee('Ordenar biblioteca');
 
-    $this->get(route('blogs.category', ['project' => $project->slug, 'category' => $category->slug, 'order' => 'popular']))
+    $this->get($project->publicCategoryUrl($category, ['order' => 'popular']))
         ->assertOk()
         ->assertSee('Mais lidos')
         ->assertSee('14 leituras');
 
-    $articleUrl = route('blogs.article', [$project->slug, $article->slug]);
-    $socialImageUrl = route('blogs.article.og-image', [
-        'project' => $project->slug,
-        'article' => $article->slug,
+    $articleUrl = $project->publicArticleUrl($article);
+    $socialImageUrl = $project->publicArticleSocialImageUrl($article, [
         'v' => $article->updated_at?->timestamp,
     ]);
 
-    $this->get(route('blogs.article', [$project->slug, $article->slug]))
+    $this->get($articleUrl)
         ->assertOk()
         ->assertSee('SEO com IA para marcas')
         ->assertSee('Analise pratica de SEO com IA para marcas em crescimento.')
@@ -207,16 +205,31 @@ test('published blog pages and sitemap are available publicly', function () {
         ->assertSee('Automacao com IA para atendimento')
         ->assertDontSee('Rascunho interno');
 
+    $this->get(route('blogs.index', $project->slug))
+        ->assertRedirect(route('home'));
+
+    $this->get(route('blogs.category', [$project->slug, $category->slug]))
+        ->assertRedirect($project->publicCategoryUrl($category));
+
+    $this->get(route('blogs.article', [$project->slug, $article->slug]))
+        ->assertRedirect($project->publicArticleUrl($article));
+
+    $this->get(route('blogs.article.og-image', [$project->slug, $article->slug]))
+        ->assertRedirect($project->publicArticleSocialImageUrl($article));
+
+    $this->get(route('blogs.article.cta', [$project->slug, $article->slug]))
+        ->assertRedirect($project->publicArticleCtaUrl($article));
+
     expect($article->fresh()->public_view_count)->toBe(1)
         ->and($article->fresh()->last_viewed_at)->not->toBeNull();
 
-    $this->get(route('blogs.article.cta', [$project->slug, $article->slug]))
+    $this->get($project->publicArticleCtaUrl($article))
         ->assertRedirect('https://blogia-public.test');
 
     expect($article->fresh()->cta_click_count)->toBe(1)
         ->and($article->fresh()->last_cta_clicked_at)->not->toBeNull();
 
-    $this->get(route('blogs.article.og-image', [$project->slug, $article->slug]))
+    $this->get($project->publicArticleSocialImageUrl($article))
         ->assertOk()
         ->assertHeader('Content-Type', 'image/svg+xml; charset=UTF-8')
         ->assertSee('SEO com IA para marcas')
@@ -225,5 +238,5 @@ test('published blog pages and sitemap are available publicly', function () {
     $this->get(route('projects.sitemap', $project->slug))
         ->assertOk()
         ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
-        ->assertSee('seo-com-ia-para-marcas');
+        ->assertSee($project->publicArticleUrl($article), false);
 });

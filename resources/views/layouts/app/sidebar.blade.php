@@ -33,7 +33,7 @@
                     {{ __('Home') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="book-open-text" href="{{ route('blogs.index', ['project' => auth()->user()->projects()->first()?->slug ?? 'blogia']) }}" target="_blank">
+                <flux:sidebar.item icon="book-open-text" href="{{ auth()->user()->projects()->first()?->publicIndexUrl() ?? route('home') }}" target="_blank">
                     {{ __('Blog Publico') }}
                 </flux:sidebar.item>
             </flux:sidebar.nav>

@@ -2,7 +2,7 @@
 @php
     $rawHtml = \Illuminate\Support\Str::markdown($article->content ?: '', ['html_input' => 'strip']);
     $rawHtml = preg_replace('/^\s*<h1[^>]*>.*?<\/h1>\s*/is', '', $rawHtml, 1);
-    $articleUrl = route('blogs.article', [$project->slug, $article->slug]);
+    $articleUrl = $project->publicArticleUrl($article);
     $metaTitle = $article->seo_title ?: $article->title;
     $metaDescription = $article->meta_description ?: $article->excerpt ?: $project->description ?: $article->title;
     $featuredImageUrl = blank($article->featured_image_path)
@@ -10,15 +10,11 @@
         : (\Illuminate\Support\Str::startsWith($article->featured_image_path, ['http://', 'https://'])
             ? $article->featured_image_path
             : url($article->featured_image_path));
-    $socialImageUrl = route('blogs.article.og-image', [
-        'project' => $project->slug,
-        'article' => $article->slug,
-        'v' => $article->updated_at?->timestamp,
-    ]);
+    $socialImageUrl = $project->publicArticleSocialImageUrl($article, ['v' => $article->updated_at?->timestamp]);
     $officialUrl = blank($project->domain)
         ? null
         : (\Illuminate\Support\Str::startsWith($project->domain, ['http://', 'https://']) ? $project->domain : 'https://'.$project->domain);
-    $ctaUrl = route('blogs.article.cta', [$project->slug, $article->slug]);
+    $ctaUrl = $project->publicArticleCtaUrl($article);
     $relatedArticles = $article->internalLinks
         ->map(fn ($link) => $link->linkedArticle)
         ->filter(fn ($relatedArticle) => $relatedArticle && $relatedArticle->status === 'published' && $relatedArticle->project_id === $project->id)
@@ -119,10 +115,10 @@
             <section class="overflow-hidden rounded-lg bg-zinc-950 text-white">
                 <div class="border-b border-white/10 px-6 py-5 md:px-10">
                     <nav class="flex flex-wrap items-center gap-2 text-sm text-zinc-300">
-                        <a href="{{ route('blogs.index', $project->slug) }}" class="font-medium text-emerald-300 transition hover:text-white">{{ $project->name }}</a>
+                        <a href="{{ $project->publicIndexUrl() }}" class="font-medium text-emerald-300 transition hover:text-white">{{ $project->name }}</a>
                         @if ($article->category)
                             <span>/</span>
-                            <a href="{{ route('blogs.category', [$project->slug, $article->category->slug]) }}" class="transition hover:text-white">{{ $article->category->name }}</a>
+                            <a href="{{ $project->publicCategoryUrl($article->category) }}" class="transition hover:text-white">{{ $article->category->name }}</a>
                         @endif
                         <span>/</span>
                         <span class="text-zinc-400">{{ $article->title }}</span>
@@ -262,7 +258,7 @@
                             <h2 class="text-sm uppercase tracking-[0.2em] text-zinc-500">Leia tambem</h2>
                             <div class="mt-4 space-y-4">
                                 @foreach ($relatedArticles as $relatedArticle)
-                                    <a href="{{ route('blogs.article', [$project->slug, $relatedArticle->slug]) }}" class="block border-b border-zinc-200 pb-4 transition hover:text-emerald-700">
+                                    <a href="{{ $project->publicArticleUrl($relatedArticle) }}" class="block border-b border-zinc-200 pb-4 transition hover:text-emerald-700">
                                         <p class="text-sm font-medium">{{ $relatedArticle->title }}</p>
                                     </a>
                                 @endforeach
@@ -275,7 +271,7 @@
                             <h2 class="text-sm uppercase tracking-[0.2em] text-zinc-500">Explorar mesma categoria</h2>
                             <div class="mt-4 space-y-4">
                                 @foreach ($sameCategoryArticles as $relatedArticle)
-                                    <a href="{{ route('blogs.article', [$project->slug, $relatedArticle->slug]) }}" class="block border-b border-zinc-200 pb-4 transition hover:text-emerald-700">
+                                    <a href="{{ $project->publicArticleUrl($relatedArticle) }}" class="block border-b border-zinc-200 pb-4 transition hover:text-emerald-700">
                                         <p class="text-sm font-medium">{{ $relatedArticle->title }}</p>
                                     </a>
                                 @endforeach
@@ -288,7 +284,7 @@
                             <h2 class="text-sm uppercase tracking-[0.2em] text-zinc-500">Mais sobre este tema</h2>
                             <div class="mt-4 space-y-4">
                                 @foreach ($sameThemeArticles as $relatedArticle)
-                                    <a href="{{ route('blogs.article', [$project->slug, $relatedArticle->slug]) }}" class="block border-b border-zinc-200 pb-4 transition hover:text-emerald-700">
+                                    <a href="{{ $project->publicArticleUrl($relatedArticle) }}" class="block border-b border-zinc-200 pb-4 transition hover:text-emerald-700">
                                         <p class="text-sm font-medium">{{ $relatedArticle->title }}</p>
                                         <p class="mt-1 text-xs text-zinc-500">{{ $relatedArticle->focus_keyword }}</p>
                                     </a>
@@ -303,14 +299,14 @@
                 <section class="border-t border-zinc-200 py-10">
                     <div class="grid gap-4 md:grid-cols-2">
                         @if ($previousArticle)
-                            <a href="{{ route('blogs.article', [$project->slug, $previousArticle->slug]) }}" class="rounded-lg border border-zinc-200 bg-white px-5 py-5 transition hover:border-emerald-300 hover:bg-emerald-50/50">
+                            <a href="{{ $project->publicArticleUrl($previousArticle) }}" class="rounded-lg border border-zinc-200 bg-white px-5 py-5 transition hover:border-emerald-300 hover:bg-emerald-50/50">
                                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Artigo anterior</p>
                                 <p class="mt-3 text-lg font-semibold tracking-tight text-zinc-950">{{ $previousArticle->title }}</p>
                             </a>
                         @endif
 
                         @if ($nextArticle)
-                            <a href="{{ route('blogs.article', [$project->slug, $nextArticle->slug]) }}" class="rounded-lg border border-zinc-200 bg-white px-5 py-5 transition hover:border-emerald-300 hover:bg-emerald-50/50">
+                            <a href="{{ $project->publicArticleUrl($nextArticle) }}" class="rounded-lg border border-zinc-200 bg-white px-5 py-5 transition hover:border-emerald-300 hover:bg-emerald-50/50">
                                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Proximo artigo</p>
                                 <p class="mt-3 text-lg font-semibold tracking-tight text-zinc-950">{{ $nextArticle->title }}</p>
                             </a>

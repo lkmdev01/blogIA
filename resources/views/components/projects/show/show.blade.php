@@ -47,7 +47,7 @@
                 </flux:button>
                 <flux:button wire:click="generateNextArticle">Gerar proximo artigo</flux:button>
                 <flux:button wire:click="refreshSitemap" variant="ghost">Atualizar sitemap</flux:button>
-                <flux:button :href="route('blogs.index', $project)" target="_blank" variant="ghost">Ver blog</flux:button>
+                <flux:button :href="$project->publicIndexUrl()" target="_blank" variant="ghost">Ver blog</flux:button>
             </div>
         </div>
     </div>
@@ -446,7 +446,7 @@
                     <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Ative GA4, PostHog e deixe cada artigo sair com imagem social propria.</p>
                 </div>
                 @if ($this->topArticles->isNotEmpty())
-                    <a href="{{ route('blogs.article.og-image', [$project->slug, $this->topArticles->first()->slug]) }}" target="_blank" class="text-sm font-medium text-lime-700 transition hover:text-lime-800 dark:text-lime-300 dark:hover:text-lime-200">
+                    <a href="{{ $project->publicArticleSocialImageUrl($this->topArticles->first()) }}" target="_blank" class="text-sm font-medium text-lime-700 transition hover:text-lime-800 dark:text-lime-300 dark:hover:text-lime-200">
                         Ver exemplo de OG image
                     </a>
                 @endif
