@@ -97,9 +97,8 @@
                             <a href="#frentes" class="transition hover:text-emerald-700">Frentes</a>
                         </nav>
 
-                        <a href="{{ $project->publicIndexUrl() }}" class="flex flex-col items-center justify-center leading-none">
-                            <span class="text-[10px] tracking-[0.32em] text-zinc-500">INOVAFORCE</span>
-                            <span class="mt-2 text-xs tracking-[0.28em] text-zinc-900">{{ $project->name }}</span>
+                        <a href="{{ $project->publicIndexUrl() }}" class="flex items-center justify-center" aria-label="{{ $project->name }}">
+                            <img src="{{ asset('logo-blog.png') }}" alt="{{ $project->name }}" class="h-11 w-auto object-contain md:h-14">
                         </a>
 
                         <nav class="hidden items-center gap-8 md:flex">

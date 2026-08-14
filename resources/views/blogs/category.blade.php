@@ -42,7 +42,12 @@
             <section class="overflow-hidden rounded-lg bg-zinc-950 text-white">
                 <div class="border-b border-white/10 px-6 py-5 md:px-10">
                     <nav class="flex flex-wrap items-center gap-2 text-sm text-zinc-300">
-                        <a href="{{ $project->publicIndexUrl() }}" class="font-medium text-emerald-300 transition hover:text-white">{{ $project->name }}</a>
+                        <a href="{{ $project->publicIndexUrl() }}" class="inline-flex items-center gap-3 font-medium text-emerald-300 transition hover:text-white">
+                            <span class="inline-flex rounded-md bg-white px-2 py-1">
+                                <img src="{{ asset('logo-blog.png') }}" alt="{{ $project->name }}" class="h-6 w-auto object-contain">
+                            </span>
+                            <span>{{ $project->name }}</span>
+                        </a>
                         <span>/</span>
                         <span class="text-zinc-400">{{ $category->name }}</span>
                     </nav>

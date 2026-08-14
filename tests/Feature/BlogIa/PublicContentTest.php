@@ -35,6 +35,7 @@ test('home page renders the primary blog when a project exists', function () {
         ->assertOk()
         ->assertSee('Blog Principal')
         ->assertSee('Uma operacao editorial unica para concentrar marca, SEO e demanda.')
+        ->assertSee('logo-blog.png')
         ->assertSee('window.blogIAAnalytics', false)
         ->assertSee('G-HOME123456', false)
         ->assertDontSee('Welcome');
@@ -65,6 +66,7 @@ test('home page uses the configured primary blog instead of the oldest project',
         ->assertOk()
         ->assertSee('Projeto Principal')
         ->assertSee('Esta e a mensagem que precisa aparecer na home publica.')
+        ->assertSee('logo-blog.png')
         ->assertSee('G-PRIMARY999', false)
         ->assertDontSee('Projeto antigo ainda existe, mas nao lidera a home.');
 });
@@ -152,6 +154,7 @@ test('published blog pages and sitemap are available publicly', function () {
         ->assertSee('BlogIA Public')
         ->assertSee('Conteudos sob medida para liderancas que querem aplicar IA com clareza comercial.')
         ->assertSee('https://cdn.example.com/hero-blogia.jpg')
+        ->assertSee('logo-blog.png')
         ->assertSee('window.blogIAAnalytics', false)
         ->assertSee('G-TEST123456', false)
         ->assertSee('phc_test_key_123', false)
@@ -179,6 +182,7 @@ test('published blog pages and sitemap are available publicly', function () {
     $this->get($project->publicCategoryUrl($category))
         ->assertOk()
         ->assertSee('SEO com IA')
+        ->assertSee('logo-blog.png')
         ->assertSee('Destaque editorial')
         ->assertSee('Ordenar biblioteca')
         ->assertSee('Navegacao');
@@ -197,6 +201,7 @@ test('published blog pages and sitemap are available publicly', function () {
         ->assertOk()
         ->assertSee('SEO com IA para marcas')
         ->assertSee('Analise pratica de SEO com IA para marcas em crescimento.')
+        ->assertSee('logo-blog.png')
         ->assertSee('Voltar ao blog')
         ->assertSee('Ir para diagnostico')
         ->assertSee('<strong>negrito importante</strong>', false)

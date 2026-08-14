@@ -10,7 +10,9 @@
 <footer class="mt-8 bg-zinc-950 text-white">
     <div class="mx-auto grid max-w-7xl gap-10 px-5 py-12 md:px-8 lg:grid-cols-[1.2fr_0.9fr_0.9fr_1fr]">
         <div>
-            <p class="text-xs font-medium uppercase tracking-[0.32em] text-emerald-300">Inovaforce</p>
+            <a href="{{ $project->publicIndexUrl() }}" class="inline-flex rounded-md bg-white px-3 py-2" aria-label="{{ $project->name }}">
+                <img src="{{ asset('logo-blog.png') }}" alt="{{ $project->name }}" class="h-10 w-auto object-contain">
+            </a>
             <h2 class="mt-4 text-2xl font-semibold tracking-tight">{{ $project->name }}</h2>
             <p class="mt-4 max-w-sm text-sm leading-7 text-zinc-300">{{ $description }}</p>
         </div>
