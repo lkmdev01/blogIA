@@ -38,10 +38,10 @@
         <div class="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-zinc-950/5 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Projetos ativos</h2>
-                    <p class="text-sm text-zinc-500 dark:text-zinc-400">Cada projeto organiza uma frente editorial com nicho, tom, pauta e automacao propria dentro do blog principal.</p>
+                    <h2 class="text-xl font-semibold text-zinc-950 dark:text-white">Projeto central</h2>
+                    <p class="text-sm text-zinc-500 dark:text-zinc-400">Edite o blog principal e acompanhe a frente editorial que responde na home publica.</p>
                 </div>
-                <flux:button :href="route('projects.index')" wire:navigate variant="primary">Novo projeto</flux:button>
+                <flux:button :href="route('projects.index')" wire:navigate variant="primary">Abrir projeto</flux:button>
             </div>
 
             <div class="mt-6 divide-y divide-zinc-100 dark:divide-zinc-800">

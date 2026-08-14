@@ -461,7 +461,19 @@ Route::get('/robots.txt', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
-    Route::view('projects', 'projects.index')->name('projects.index');
+    Route::get('projects', function () {
+        $centralProject = auth()->user()
+            ->projects()
+            ->orderByDesc('is_primary_public')
+            ->oldest('id')
+            ->first();
+
+        if ($centralProject) {
+            return redirect()->route('projects.show', $centralProject);
+        }
+
+        return view('projects.index');
+    })->name('projects.index');
 
     Route::get('projects/{project:slug}', function (Project $project) {
         abort_unless($project->user_id === auth()->id(), 403);

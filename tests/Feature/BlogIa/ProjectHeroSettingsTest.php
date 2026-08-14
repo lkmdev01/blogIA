@@ -29,6 +29,36 @@ test('project can be created with hero content defaults from dashboard', functio
         ->and($project?->hero_image_url)->toBe('https://cdn.example.com/hero-create.jpg');
 });
 
+test('projects index redirects to the central project when one already exists', function () {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create([
+        'is_primary_public' => true,
+    ]);
+
+    $this->actingAs($user);
+
+    $this->get(route('projects.index'))
+        ->assertRedirect(route('projects.show', $project));
+});
+
+test('create project action redirects to the central project when one already exists', function () {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create([
+        'is_primary_public' => true,
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('projects.index')
+        ->set('name', 'Outro Projeto')
+        ->set('niche', 'IA para empresas')
+        ->set('primaryKeywords', 'ia para empresas')
+        ->call('createProject')
+        ->assertRedirect(route('projects.show', $project));
+
+    expect(Project::query()->where('user_id', $user->id)->count())->toBe(1);
+});
+
 test('project hero content can be updated from dashboard settings', function () {
     $user = User::factory()->create();
     $project = Project::factory()->for($user)->create([

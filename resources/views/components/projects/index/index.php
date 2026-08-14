@@ -81,8 +81,26 @@ new class extends Component
             ->get();
     }
 
+    #[Computed]
+    public function centralProject(): ?Project
+    {
+        return auth()->user()
+            ->projects()
+            ->orderByDesc('is_primary_public')
+            ->oldest('id')
+            ->first();
+    }
+
     public function createProject(): void
     {
+        if ($this->centralProject) {
+            Flux::toast(text: 'Seu workspace ja trabalha com um projeto central. Abra esse projeto para editar.');
+
+            $this->redirect(route('projects.show', $this->centralProject), navigate: true);
+
+            return;
+        }
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:120'],
             'domain' => ['nullable', 'string', 'max:255'],
