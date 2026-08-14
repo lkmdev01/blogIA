@@ -11,6 +11,7 @@ use App\Services\Seo\ArticleGeneratorService;
 use App\Services\Seo\ContentPlannerService;
 use App\Services\Seo\ProjectContentGenerationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -180,7 +181,7 @@ KEY);
     cache()->forget('google-search-console-access-token');
     cache()->forget('google-trends-bigquery-access-token');
 
-    Http::fake(function (\Illuminate\Http\Client\Request $request) {
+    Http::fake(function (Request $request) {
         if ($request->url() === 'https://oauth2.googleapis.com/token') {
             return Http::response([
                 'access_token' => 'token-123',
@@ -331,7 +332,7 @@ KEY);
     cache()->forget('google-search-console-access-token');
     cache()->forget('google-trends-bigquery-access-token');
 
-    Http::fake(function (\Illuminate\Http\Client\Request $request) {
+    Http::fake(function (Request $request) {
         if ($request->url() === 'https://oauth2.googleapis.com/token') {
             return Http::response([
                 'access_token' => 'token-123',
@@ -531,10 +532,14 @@ test('authenticated blogia management screens render', function () {
     $this->actingAs($user);
 
     $this->get(route('dashboard'))->assertOk()->assertSee('BlogIA SEO Engine');
-    $this->get(route('projects.index'))->assertOk()->assertSee('Cadastrar projeto');
+    $this->get(route('projects.index'))->assertRedirect(route('projects.show', $project));
     $this->get(route('projects.show', $project))->assertOk()->assertSee($project->name);
     $this->get(route('articles.index'))->assertOk()->assertSee('Lista de artigos');
-    $this->get(route('articles.edit', $article))->assertOk()->assertSee('Editor de artigo');
+    $this->get(route('articles.edit', $article))
+        ->assertOk()
+        ->assertSee('Editor de artigo')
+        ->assertSee('Abrir previa formatada')
+        ->assertSee('Previa formatada');
 });
 
 test('it falls back when groq returns invalid strategy json', function () {

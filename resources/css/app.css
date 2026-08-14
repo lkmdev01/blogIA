@@ -84,11 +84,11 @@ select:focus[data-flux-control] {
     }
 
     .blogia-prose {
-        @apply max-w-none text-[1.05rem] leading-8 text-zinc-700;
+        @apply max-w-none text-base leading-8 text-zinc-700 md:text-[1.05rem];
     }
 
     .blogia-prose > * + * {
-        @apply mt-5;
+        @apply mt-6 md:mt-7;
     }
 
     .blogia-prose h1,
@@ -103,11 +103,11 @@ select:focus[data-flux-control] {
     }
 
     .blogia-prose h2 {
-        @apply mt-12 border-t border-zinc-200 pt-8 text-3xl font-semibold tracking-tight;
+        @apply mt-12 border-t border-zinc-200 pt-8 text-2xl font-semibold tracking-tight md:text-3xl;
     }
 
     .blogia-prose h3 {
-        @apply mt-8 text-2xl font-semibold tracking-tight;
+        @apply mt-8 text-xl font-semibold tracking-tight md:text-2xl;
     }
 
     .blogia-prose h4 {
@@ -116,6 +116,10 @@ select:focus[data-flux-control] {
 
     .blogia-prose p {
         @apply text-zinc-700;
+    }
+
+    .blogia-prose > p:first-of-type {
+        @apply text-lg leading-8 text-zinc-800 md:text-[1.2rem];
     }
 
     .blogia-prose strong {
@@ -141,6 +145,10 @@ select:focus[data-flux-control] {
 
     .blogia-prose li {
         @apply pl-1 text-zinc-700 marker:text-emerald-700;
+    }
+
+    .blogia-prose img {
+        @apply my-8 w-full rounded-lg object-cover;
     }
 
     .blogia-prose blockquote {

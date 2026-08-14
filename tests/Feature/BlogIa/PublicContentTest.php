@@ -180,7 +180,8 @@ test('published blog pages and sitemap are available publicly', function () {
         ->assertOk()
         ->assertSee('SEO com IA')
         ->assertSee('Destaque editorial')
-        ->assertSee('Ordenar biblioteca');
+        ->assertSee('Ordenar biblioteca')
+        ->assertSee('Navegacao');
 
     $this->get($project->publicCategoryUrl($category, ['order' => 'popular']))
         ->assertOk()
@@ -196,6 +197,8 @@ test('published blog pages and sitemap are available publicly', function () {
         ->assertOk()
         ->assertSee('SEO com IA para marcas')
         ->assertSee('Analise pratica de SEO com IA para marcas em crescimento.')
+        ->assertSee('Voltar ao blog')
+        ->assertSee('Ir para diagnostico')
         ->assertSee('<strong>negrito importante</strong>', false)
         ->assertSee('<blockquote>', false)
         ->assertSee('<li><strong>Pilar:</strong> organize a pauta.</li>', false)
@@ -228,10 +231,15 @@ test('published blog pages and sitemap are available publicly', function () {
         ->assertSee('Sobre a operacao')
         ->assertSee('Atualizado em')
         ->assertSee('Explorar mesma categoria')
+        ->assertSee('Continue lendo')
         ->assertSee('Artigo anterior')
         ->assertSee('Proximo artigo')
+        ->assertSee('Categorias')
+        ->assertSee('Navegacao')
+        ->assertSee('Home do blog')
         ->assertSee('https://blogia-public.test')
         ->assertSee('Automacao com IA para atendimento')
+        ->assertDontSee('Direcao executiva')
         ->assertDontSee('Rascunho interno');
 
     $this->get(route('blogs.index', $project->slug))

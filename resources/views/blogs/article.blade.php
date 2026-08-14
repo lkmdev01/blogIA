@@ -15,6 +15,7 @@
         ? null
         : (\Illuminate\Support\Str::startsWith($project->domain, ['http://', 'https://']) ? $project->domain : 'https://'.$project->domain);
     $ctaUrl = $project->publicArticleCtaUrl($article);
+    $readingTime = max(1, (int) ceil(max(200, $article->word_count) / 200));
     $relatedArticles = $article->internalLinks
         ->map(fn ($link) => $link->linkedArticle)
         ->filter(fn ($relatedArticle) => $relatedArticle && $relatedArticle->status === 'published' && $relatedArticle->project_id === $project->id)
@@ -111,9 +112,9 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-stone-50 text-zinc-950 antialiased">
-        <main class="mx-auto max-w-6xl px-5 py-5 md:px-8 md:py-8">
-            <section class="overflow-hidden rounded-lg bg-zinc-950 text-white">
-                <div class="border-b border-white/10 px-6 py-5 md:px-10">
+        <main class="mx-auto max-w-7xl px-4 py-4 md:px-8 md:py-8">
+            <section class="overflow-hidden rounded-[1.25rem] bg-zinc-950 text-white md:rounded-[1.5rem]">
+                <div class="border-b border-white/10 px-5 py-5 md:px-10">
                     <nav class="flex flex-wrap items-center gap-2 text-sm text-zinc-300">
                         <a href="{{ $project->publicIndexUrl() }}" class="font-medium text-emerald-300 transition hover:text-white">{{ $project->name }}</a>
                         @if ($article->category)
@@ -125,11 +126,11 @@
                     </nav>
                 </div>
 
-                <div class="grid gap-10 px-6 py-10 md:px-10 md:py-12 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
-                    <div>
+                <div class="px-5 py-10 md:px-10 md:py-12">
+                    <div class="max-w-4xl">
                         <p class="text-sm font-medium uppercase tracking-[0.25em] text-emerald-300">{{ $article->category?->name ?: $project->niche }}</p>
-                        <h1 class="mt-4 max-w-4xl text-4xl font-semibold tracking-tight md:text-5xl">{{ $article->title }}</h1>
-                        <p class="mt-5 max-w-3xl text-lg leading-8 text-zinc-200">{{ $article->excerpt ?: $article->meta_description }}</p>
+                        <h1 class="mt-4 max-w-4xl text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">{{ $article->title }}</h1>
+                        <p class="mt-5 max-w-3xl text-base leading-8 text-zinc-200 md:text-lg">{{ $article->excerpt ?: $article->meta_description }}</p>
                         <div class="mt-6 flex flex-wrap gap-2 text-sm text-zinc-400">
                             <span>{{ $article->published_at?->format('d/m/Y') }}</span>
                             @if ($article->updated_at && $article->updated_at->ne($article->published_at))
@@ -138,76 +139,99 @@
                             @endif
                             @if ($article->word_count > 0)
                                 <span>&middot;</span>
-                                <span>{{ max(1, (int) ceil($article->word_count / 200)) }} min de leitura</span>
+                                <span>{{ $readingTime }} min de leitura</span>
                             @endif
                         </div>
-                    </div>
 
-                    <aside class="border-t border-white/15 pt-6 lg:border-t-0 lg:border-l lg:pl-8 lg:pt-0">
-                        <p class="text-sm uppercase tracking-[0.2em] text-zinc-400">Direcao executiva</p>
-                        <p class="mt-3 text-sm leading-7 text-zinc-200">{{ $project->default_cta ?: 'Conecte tecnologia, marketing e operacao em uma unica estrategia de crescimento.' }}</p>
-                    </aside>
+                        <div class="mt-7 flex flex-wrap gap-3">
+                            <a href="{{ $project->publicIndexUrl() }}" class="inline-flex items-center justify-center rounded-md border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-100 transition hover:border-white/30 hover:bg-white/10">
+                                Voltar ao blog
+                            </a>
+                            @if ($article->category)
+                                <a href="{{ $project->publicCategoryUrl($article->category) }}" class="inline-flex items-center justify-center rounded-md border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-100 transition hover:border-white/30 hover:bg-white/10">
+                                    Ver categoria
+                                </a>
+                            @endif
+                            <a href="#diagnostico-estrategico" class="inline-flex items-center justify-center rounded-md bg-emerald-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-950 transition hover:bg-emerald-200">
+                                Ir para diagnostico
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <section class="grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_280px]">
-                <article>
-                    @if ($article->featured_image_path)
-                        <img src="{{ $featuredImageUrl }}" alt="{{ $article->featured_image_alt ?: $article->title }}" class="aspect-[16/9] w-full rounded-lg object-cover">
-                    @endif
+            <section class="grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-12">
+                <article class="min-w-0">
+                    <div class="mx-auto max-w-3xl">
+                        @if ($article->featured_image_path)
+                            <img src="{{ $featuredImageUrl }}" alt="{{ $article->featured_image_alt ?: $article->title }}" class="aspect-[16/9] w-full rounded-lg object-cover">
+                        @endif
 
-                    @if ($showTableOfContents)
-                        <div class="mt-8 rounded-md border border-zinc-200 bg-white px-5 py-5 lg:hidden">
-                            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">Neste artigo</p>
-                            <div class="mt-4 flex flex-col gap-3">
-                                @foreach ($tableOfContents as $item)
-                                    <a
-                                        href="#{{ $item['id'] }}"
-                                        data-article-toc-link
-                                        class="text-sm transition hover:text-emerald-700 {{ $loop->first ? 'font-semibold text-emerald-700' : 'font-medium text-zinc-700' }}"
-                                        @if ($loop->first) aria-current="true" @endif
-                                    >{{ $item['label'] }}</a>
-                                @endforeach
+                        @if ($showTableOfContents)
+                            <div class="mt-8 rounded-lg border border-zinc-200 bg-white px-5 py-5 shadow-sm lg:hidden">
+                                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">Neste artigo</p>
+                                <div class="mt-4 flex flex-col gap-3">
+                                    @foreach ($tableOfContents as $item)
+                                        <a
+                                            href="#{{ $item['id'] }}"
+                                            data-article-toc-link
+                                            class="text-sm transition hover:text-emerald-700 {{ $loop->first ? 'font-semibold text-emerald-700' : 'font-medium text-zinc-700' }}"
+                                            @if ($loop->first) aria-current="true" @endif
+                                        >{{ $item['label'] }}</a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="mt-8 rounded-lg border border-zinc-200 bg-white px-5 py-5 shadow-sm">
+                            <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                                <span>Leitura guiada</span>
+                                <span class="h-1 w-1 rounded-full bg-zinc-300"></span>
+                                <span>{{ $readingTime }} min</span>
+                                @if (filled($article->focus_keyword))
+                                    <span class="h-1 w-1 rounded-full bg-zinc-300"></span>
+                                    <span>{{ $article->focus_keyword }}</span>
+                                @endif
+                            </div>
+
+                            <div class="blogia-prose mt-8">
+                                {!! $articleHtml !!}
                             </div>
                         </div>
-                    @endif
 
-                    <div class="blogia-prose mt-10">
-                        {!! $articleHtml !!}
+                        <section id="diagnostico-estrategico" class="mt-12 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-5 py-6 md:px-6 md:py-7">
+                            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Diagnostico estrategico</p>
+                            <h2 class="mt-3 text-2xl font-semibold tracking-tight text-zinc-950">Transforme esse tema em crescimento previsivel</h2>
+                            <p class="mt-4 max-w-3xl text-sm leading-7 text-zinc-600">
+                                {{ $article->cta ?: $project->default_cta ?: 'Leve esse aprendizado para uma operacao pratica com diagnostico, plano editorial e automacao conectada ao comercial.' }}
+                            </p>
+                            <div class="mt-5 grid gap-3 text-sm text-zinc-700 md:grid-cols-3">
+                                <div class="rounded-md border border-emerald-200 bg-white px-4 py-4">
+                                    <p class="font-medium text-zinc-950">Diagnostico editorial</p>
+                                    <p class="mt-2 leading-6">Mapeamento rapido de oportunidades SEO, pauta e prioridades comerciais.</p>
+                                </div>
+                                <div class="rounded-md border border-emerald-200 bg-white px-4 py-4">
+                                    <p class="font-medium text-zinc-950">Conversa executiva</p>
+                                    <p class="mt-2 leading-6">Defina o que gera demanda agora, o que entra em automacao e o que precisa de prova tecnica.</p>
+                                </div>
+                                <div class="rounded-md border border-emerald-200 bg-white px-4 py-4">
+                                    <p class="font-medium text-zinc-950">Plano de execucao</p>
+                                    <p class="mt-2 leading-6">Receba um caminho objetivo para transformar conteudo em canal de aquisicao.</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <p class="text-sm text-zinc-600">Operacao orientada por SEO, automacao e conversao, sem conteudo solto.</p>
+                                <a href="{{ $ctaUrl }}" data-analytics-event="blog_cta_click" data-analytics-location="article_final" data-analytics-label="Solicitar diagnostico" class="inline-flex items-center justify-center rounded-md bg-emerald-300 px-5 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-950 transition hover:bg-emerald-200">
+                                    Solicitar diagnostico
+                                </a>
+                            </div>
+                        </section>
                     </div>
-
-                    <section class="mt-12 rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-7">
-                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Diagnostico estrategico</p>
-                        <h2 class="mt-3 text-2xl font-semibold tracking-tight text-zinc-950">Transforme esse tema em crescimento previsivel</h2>
-                        <p class="mt-4 max-w-3xl text-sm leading-7 text-zinc-600">
-                            {{ $article->cta ?: $project->default_cta ?: 'Leve esse aprendizado para uma operacao pratica com diagnostico, plano editorial e automacao conectada ao comercial.' }}
-                        </p>
-                        <div class="mt-5 grid gap-3 text-sm text-zinc-700 md:grid-cols-3">
-                            <div class="rounded-md border border-emerald-200 bg-white px-4 py-4">
-                                <p class="font-medium text-zinc-950">Diagnostico editorial</p>
-                                <p class="mt-2 leading-6">Mapeamento rapido de oportunidades SEO, pauta e prioridades comerciais.</p>
-                            </div>
-                            <div class="rounded-md border border-emerald-200 bg-white px-4 py-4">
-                                <p class="font-medium text-zinc-950">Conversa executiva</p>
-                                <p class="mt-2 leading-6">Defina o que gera demanda agora, o que entra em automacao e o que precisa de prova tecnica.</p>
-                            </div>
-                            <div class="rounded-md border border-emerald-200 bg-white px-4 py-4">
-                                <p class="font-medium text-zinc-950">Plano de execucao</p>
-                                <p class="mt-2 leading-6">Receba um caminho objetivo para transformar conteudo em canal de aquisicao.</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <p class="text-sm text-zinc-600">Operacao orientada por SEO, automacao e conversao, sem conteudo solto.</p>
-                            <a href="{{ $ctaUrl }}" data-analytics-event="blog_cta_click" data-analytics-location="article_final" data-analytics-label="Solicitar diagnostico" class="inline-flex items-center justify-center rounded-md bg-emerald-300 px-5 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-950 transition hover:bg-emerald-200">
-                                Solicitar diagnostico
-                            </a>
-                        </div>
-                    </section>
                 </article>
 
-                <aside class="border-t border-zinc-200 pt-8 lg:border-t-0 lg:border-l lg:pl-8 lg:pt-0">
+                <aside class="border-t border-zinc-200 pt-8 lg:sticky lg:top-8 lg:border-t-0 lg:pt-0">
                     @if ($showTableOfContents)
-                        <div class="border-b border-zinc-200 pb-6">
+                        <div class="rounded-lg border border-zinc-200 bg-white px-5 py-5 shadow-sm">
                             <p class="text-sm uppercase tracking-[0.2em] text-zinc-500">Neste artigo</p>
                             <div class="mt-4 space-y-3">
                                 @foreach ($tableOfContents as $item)
@@ -223,7 +247,7 @@
                     @endif
 
                     @if (filled($article->cta ?: $project->default_cta))
-                        <div class="{{ $showTableOfContents ? 'mt-8' : '' }} border-b border-zinc-200 pb-6">
+                        <div class="{{ $showTableOfContents ? 'mt-4' : '' }} rounded-lg border border-zinc-200 bg-white px-5 py-5 shadow-sm">
                             <p class="text-sm uppercase tracking-[0.2em] text-zinc-500">Proximo passo</p>
                             <p class="mt-3 text-sm leading-7 text-zinc-600">{{ $article->cta ?: $project->default_cta }}</p>
                             <a href="{{ $ctaUrl }}" data-analytics-event="blog_cta_click" data-analytics-location="article_sidebar" data-analytics-label="Falar com especialistas" class="mt-5 inline-flex items-center justify-center rounded-md bg-emerald-300 px-4 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-950 transition hover:bg-emerald-200">
@@ -233,7 +257,7 @@
                         </div>
                     @endif
 
-                    <div class="mt-8 border-b border-zinc-200 pb-6">
+                    <div class="mt-4 rounded-lg border border-zinc-200 bg-white px-5 py-5 shadow-sm">
                         <p class="text-sm uppercase tracking-[0.2em] text-zinc-500">Sobre a operacao</p>
                         <p class="mt-3 text-sm font-medium text-zinc-950">{{ $project->name }}</p>
                         <p class="mt-2 text-sm leading-7 text-zinc-600">{{ $project->description ?: 'Operacao editorial orientada por dados, SEO e crescimento comercial.' }}</p>
@@ -254,7 +278,7 @@
                     </div>
 
                     @if ($relatedArticles->isNotEmpty())
-                        <div class="mt-8">
+                        <div class="mt-4 rounded-lg border border-zinc-200 bg-white px-5 py-5 shadow-sm">
                             <h2 class="text-sm uppercase tracking-[0.2em] text-zinc-500">Leia tambem</h2>
                             <div class="mt-4 space-y-4">
                                 @foreach ($relatedArticles as $relatedArticle)
@@ -267,7 +291,7 @@
                     @endif
 
                     @if ($sameCategoryArticles->isNotEmpty())
-                        <div class="mt-8">
+                        <div class="mt-4 rounded-lg border border-zinc-200 bg-white px-5 py-5 shadow-sm">
                             <h2 class="text-sm uppercase tracking-[0.2em] text-zinc-500">Explorar mesma categoria</h2>
                             <div class="mt-4 space-y-4">
                                 @foreach ($sameCategoryArticles as $relatedArticle)
@@ -280,7 +304,7 @@
                     @endif
 
                     @if ($sameThemeArticles->isNotEmpty())
-                        <div class="mt-8">
+                        <div class="mt-4 rounded-lg border border-zinc-200 bg-white px-5 py-5 shadow-sm">
                             <h2 class="text-sm uppercase tracking-[0.2em] text-zinc-500">Mais sobre este tema</h2>
                             <div class="mt-4 space-y-4">
                                 @foreach ($sameThemeArticles as $relatedArticle)
@@ -297,6 +321,9 @@
 
             @if ($previousArticle || $nextArticle)
                 <section class="border-t border-zinc-200 py-10">
+                    <div class="mb-4">
+                        <p class="text-sm uppercase tracking-[0.2em] text-zinc-500">Continue lendo</p>
+                    </div>
                     <div class="grid gap-4 md:grid-cols-2">
                         @if ($previousArticle)
                             <a href="{{ $project->publicArticleUrl($previousArticle) }}" class="rounded-lg border border-zinc-200 bg-white px-5 py-5 transition hover:border-emerald-300 hover:bg-emerald-50/50">
@@ -315,6 +342,20 @@
                 </section>
             @endif
         </main>
+
+        @include('blogs.partials.footer', [
+            'project' => $project,
+            'description' => $project->hero_description ?: ($project->description ?: 'Conteudos sobre inteligencia artificial aplicada a empresas, com foco em automacao, produtividade e crescimento comercial.'),
+            'officialUrl' => $officialUrl,
+            'navigationLinks' => [
+                'Home do blog' => $project->publicIndexUrl(),
+                'Leituras' => $project->publicIndexUrl().'#leituras',
+                'Biblioteca' => $project->publicIndexUrl().'#biblioteca',
+                'Buscar no blog' => $project->publicIndexUrl().'#top',
+            ],
+            'contactHref' => $ctaUrl,
+            'contactLabel' => 'Solicitar diagnostico',
+        ])
 
         @if ($showTableOfContents)
             <script>

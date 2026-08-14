@@ -137,5 +137,21 @@
                 @endif
             </section>
         </main>
+
+        @include('blogs.partials.footer', [
+            'project' => $project,
+            'description' => $project->hero_description ?: ($project->description ?: 'Conteudos sobre inteligencia artificial aplicada a empresas, com foco em automacao, produtividade e crescimento comercial.'),
+            'officialUrl' => blank($project->domain)
+                ? null
+                : (\Illuminate\Support\Str::startsWith($project->domain, ['http://', 'https://']) ? $project->domain : 'https://'.$project->domain),
+            'navigationLinks' => [
+                'Home do blog' => $project->publicIndexUrl(),
+                'Categoria atual' => $project->publicCategoryUrl($category),
+                'Biblioteca' => $project->publicIndexUrl().'#biblioteca',
+                'Buscar no blog' => $project->publicIndexUrl().'#top',
+            ],
+            'contactHref' => $project->publicIndexUrl().'#conversa',
+            'contactLabel' => 'Abrir conversa estrategica',
+        ])
     </body>
 </html>

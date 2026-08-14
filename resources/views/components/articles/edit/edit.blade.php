@@ -33,11 +33,15 @@
 
                     <flux:textarea wire:model="cta" label="CTA final" rows="3" />
 
-                    <div class="rounded-3xl border border-zinc-200 bg-stone-50 p-5 dark:border-zinc-800 dark:bg-zinc-950/50">
-                        <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">Previa formatada</h3>
-                        <div class="blogia-prose mt-4">
-                            {!! \Illuminate\Support\Str::markdown($content ?: '', ['html_input' => 'strip']) !!}
+                    <div class="flex items-center justify-between gap-4 rounded-3xl border border-zinc-200 bg-stone-50 p-5 dark:border-zinc-800 dark:bg-zinc-950/50">
+                        <div>
+                            <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">Previa formatada</h3>
+                            <p class="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">Abra a visualizacao quando quiser revisar a leitura final sem perder espaco da tela.</p>
                         </div>
+
+                        <flux:modal.trigger name="article-markdown-preview">
+                            <flux:button type="button" variant="ghost">Abrir previa formatada</flux:button>
+                        </flux:modal.trigger>
                     </div>
                 </div>
             </div>
@@ -125,4 +129,25 @@
             </div>
         </aside>
     </form>
+
+    <flux:modal name="article-markdown-preview" class="max-w-4xl">
+        <div class="space-y-5">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <flux:heading size="lg">Previa formatada</flux:heading>
+                    <flux:subheading>Leitura renderizada do artigo para revisar estrutura, ritmo e hierarquia.</flux:subheading>
+                </div>
+
+                <flux:modal.close>
+                    <flux:button type="button" variant="filled">Fechar</flux:button>
+                </flux:modal.close>
+            </div>
+
+            <div class="max-h-[70vh] overflow-y-auto rounded-3xl border border-zinc-200 bg-stone-50 p-5 dark:border-zinc-800 dark:bg-zinc-950/50">
+                <div class="blogia-prose">
+                    {!! \Illuminate\Support\Str::markdown($content ?: '', ['html_input' => 'strip']) !!}
+                </div>
+            </div>
+        </div>
+    </flux:modal>
 </section>
